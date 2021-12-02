@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
 library SafeMath {
@@ -586,6 +586,7 @@ contract LuxorStaking is Ownable {
         uint32 length;
         uint32 endTime;
     }
+
     Epoch public epoch;
 
     address public distributor;
@@ -595,26 +596,28 @@ contract LuxorStaking is Ownable {
     
     address public warmupContract;
     uint public warmupPeriod;
-    
-    constructor ( 
-        address _Luxor, 
-        address _Lumens, 
+    bool public isInitialized;
+
+    constructor( address _Luxor, address _Lumens ) {
+        Luxor = _Luxor;
+        Lumens = _Lumens;
+    }
+
+    function initialize( 
         uint32 _epochLength,
         uint _firstEpochNumber,
         uint32 _firstEpochTime
-    ) {
-        require( _Luxor != address(0) );
-        Luxor = _Luxor;
-        require( _Lumens != address(0) );
-        Lumens = _Lumens;
-        
+        ) public onlyManager {
+
         epoch = Epoch({
             length: _epochLength,
             number: _firstEpochNumber,
             endTime: _firstEpochTime,
             distribute: 0
         });
-    }
+
+        isInitialized = true;
+     }
 
     struct Claim {
         uint deposit;
@@ -630,6 +633,7 @@ contract LuxorStaking is Ownable {
         @return bool
      */
     function stake( uint _amount, address _recipient ) external returns ( bool ) {
+        require(isInitialized, 'has not begun');
         rebase();
         
         IERC20( Luxor ).safeTransferFrom( msg.sender, address(this), _amount );
@@ -653,6 +657,7 @@ contract LuxorStaking is Ownable {
         @param _recipient address
      */
     function claim ( address _recipient ) public {
+        require(isInitialized, 'has not begun');
         Claim memory info = warmupInfo[ _recipient ];
         if ( epoch.number >= info.expiry && info.expiry != 0 ) {
             delete warmupInfo[ _recipient ];
@@ -664,6 +669,7 @@ contract LuxorStaking is Ownable {
         @notice forfeit LUM in warmup and retrieve LUX
      */
     function forfeit() external {
+        require(isInitialized, 'has not begun');
         Claim memory info = warmupInfo[ msg.sender ];
         delete warmupInfo[ msg.sender ];
 
@@ -675,6 +681,7 @@ contract LuxorStaking is Ownable {
         @notice prevent new deposits to address (protection from malicious activity)
      */
     function toggleDepositLock() external {
+        require(isInitialized, 'has not begun');
         warmupInfo[ msg.sender ].lock = !warmupInfo[ msg.sender ].lock;
     }
 
@@ -684,6 +691,7 @@ contract LuxorStaking is Ownable {
         @param _trigger bool
      */
     function unstake( uint _amount, bool _trigger ) external {
+        require(isInitialized, 'has not begun');
         if ( _trigger ) {
             rebase();
         }
@@ -703,6 +711,7 @@ contract LuxorStaking is Ownable {
         @notice trigger rebase if epoch over
      */
     function rebase() public {
+        require(isInitialized, 'has not begun');
         if( epoch.endTime <= uint32(block.timestamp) ) {
 
             ILumens( Lumens ).rebase( epoch.distribute, epoch.number );
