@@ -1,8 +1,8 @@
 # Luxor Contracts
 Smart contracts for the LUX and LUM tokens.
 
-## Deployed Contracts
-
+# Deployed Contracts
+## Test Contracts
 ### Token Contracts
 - [Luxor.sol](https://ftmscan.com/address/0x01ABFdF9AA9B1689f5497409112e327B51397783#code)
 - [Lumens.sol](https://ftmscan.com/address/0x204Fd448DED97A87A442a512768503e3fd175d70#code)
@@ -30,6 +30,36 @@ Smart contracts for the LUX and LUM tokens.
     - [WFTM](https://ftmscan.com/address/0xa2967b2DACa73cE9D1f89f399F9B8E9810C20934#code)
 
 
+## Production Contracts
+
+### Token Contracts
+- [Luxor.sol](https://ftmscan.com/address/0x6671E20b83Ba463F270c8c75dAe57e3Cc246cB2b#code)
+- [Lumens.sol](https://ftmscan.com/address/0x4290b33158F429F40C0eDc8f9b9e5d8C5288800c#code)
+
+### Treasury Contracts
+- [Treasury.sol](https://ftmscan.com/address/0xDF2A28Cc2878422354A93fEb05B41Bd57d71DB24#code)
+- [MultiSigWalletWithDailyLimit.sol](https://ftmscan.com/address/0xFa5Ebc2731ec2292bc4Cdc192d2a5f6F4B312e92#code)
+- [LuxorZapIn.sol](https://ftmscan.com/address/0x34473F7aCEFF5b258a26eCaB8E7134d2762414ea#code)
+- [Distributor.sol](https://ftmscan.com/address/0x032f6db264E78885E156F04564344F4c1C59101f#code)
+
+
+### Staking Contracts
+- [LuxorStaking.sol](https://ftmscan.com/address/0x50faF4694E83B1aa6848a3F0aF56Bc3283C2Cfae#code)
+- [StakingHelper.sol](https://ftmscan.com/address/0xa273C79b081fC6cd5E1a44fEB79EaEa56e6dE992#code)
+
+### Bonding Contracts
+- [LuxorBondingCalculator.sol](https://ftmscan.com/address/0x6e2bd6d4654226C752A0bC753A3f9Cd6F569B6cB#code)
+- LuxorBondDepository
+    - [WFTM-LUX](https://ftmscan.com/address/0x6fB6368e59621eD69639a44C7b39930780cCCE51#code)
+    - [WFTM](https://ftmscan.com/address/0x60509400CFC30f3F468630EfD8bB08D864564D72#code)
+    - [DAI-LUX](https://ftmscan.com/address/0x194C771f142751A0368aE9E92dC4eF7E0B5327D5#code)
+    - [DAI](https://ftmscan.com/address/0x4D30bF2166B2F4eB61913Bdff00d67D8BA0657E1#code)
+
+
+
 ## Miscellaneous
 - DAO: 0x1C63C726926197BD3CB75d86bCFB1DaeBcD87250
 - WFTM: 0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83
+- DAI: 0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E
+- WFTM/LUX: 0x951BBB838e49F7081072895947735b0892cCcbCD
+- DAI/LUX: 0x46729c2AeeabE7774a0E710867df80a6E19Ef851
