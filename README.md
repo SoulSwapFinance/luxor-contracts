@@ -15,6 +15,7 @@ Smart contracts for the LUX and LUM tokens.
 - [Treasury.sol](https://ftmscan.com/address/0x37489dBC4D2420C5ece0ab0F90886a69a683E75F#code)
 - [MultiSigWalletWithDailyLimit.sol](https://ftmscan.com/address/0xFa5Ebc2731ec2292bc4Cdc192d2a5f6F4B312e92#code)
 - [LuxorZapIn.sol](https://ftmscan.com/address/0xaf7060B7821A51293462710484FF78FEAb57fbA6#code)
+- [Distributor.sol](https://ftmscan.com/address/0xd10F561cf345F86A132Feeb4E781Ba2DdF85cb29#code)
 
 ### Staking Contracts
 - [LuxorStaking.sol](https://ftmscan.com/address/0xa528f9142D4131490bBA0D9d70288730F8A6205E#code)
