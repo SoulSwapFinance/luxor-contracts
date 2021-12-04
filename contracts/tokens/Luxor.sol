@@ -1,454 +1,437 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity ^0.7.6;
 
-/**
- * @dev Wrappers over Solidity's arithmetic operations with added overflow
- * checks.
- *
- * Arithmetic operations in Solidity wrap on overflow. This can easily result
- * in bugs, because programmers usually assume that an overflow raises an
- * error, which is the standard behavior in high level programming languages.
- * `SafeMath` restores this intuition by reverting the transaction when an
- * operation overflows.
- *
- * Using this library instead of the unchecked operations eliminates an entire
- * class of bugs, so it's recommended to use it always.
- */
-library SafeMath {
-    /**
-     * @dev Returns the addition of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `+` operator.
-     *
-     * Requirements:
-     *
-     * - Addition cannot overflow.
-     */
-    function add(uint a, uint b) internal pure returns (uint) {
-        uint c = a + b;
-        require(c >= a, "SafeMath: addition overflow");
+library EnumerableSet {
 
-        return c;
-    }
+  // To implement this library for multiple types with as little code
+  // repetition as possible, we write it in terms of a generic Set type with
+  // bytes32 values.
+  // The Set implementation uses private functions, and user-facing
+  // implementations (such as AddressSet) are just wrappers around the
+  // underlying Set.
+  // This means that we can only create new EnumerableSets for types that fit
+  // in bytes32.
+  struct Set {
+    // Storage of set values
+    bytes32[] _values;
 
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint a, uint b) internal pure returns (uint) {
-        return sub(a, b, "SafeMath: subtraction overflow");
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint a, uint b, string memory errorMessage) internal pure returns (uint) {
-        require(b <= a, errorMessage);
-        uint c = a - b;
-
-        return c;
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `*` operator.
-     *
-     * Requirements:
-     *
-     * - Multiplication cannot overflow.
-     */
-    function mul(uint a, uint b) internal pure returns (uint) {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
-        if (a == 0) {
-            return 0;
-        }
-
-        uint c = a * b;
-        require(c / a == b, "SafeMath: multiplication overflow");
-
-        return c;
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers. Reverts on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint a, uint b) internal pure returns (uint) {
-        return div(a, b, "SafeMath: division by zero");
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint a, uint b, string memory errorMessage) internal pure returns (uint) {
-        require(b > 0, errorMessage);
-        uint c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-
-        return c;
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * Reverts when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint a, uint b) internal pure returns (uint) {
-        return mod(a, b, "SafeMath: modulo by zero");
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * Reverts with custom message when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint a, uint b, string memory errorMessage) internal pure returns (uint) {
-        require(b != 0, errorMessage);
-        return a % b;
-    }
-
-    // babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
-    function sqrrt(uint a) internal pure returns (uint c) {
-        if (a > 3) {
-            c = a;
-            uint b = add( div( a, 2), 1 );
-            while (b < c) {
-                c = b;
-                b = div( add( div( a, b ), b), 2 );
-            }
-        } else if (a != 0) {
-            c = 1;
-        }
-    }
-
-    /*
-     * Expects percentage to be trailed by 00,
-    */
-    function percentageAmount( uint total_, uint8 percentage_ ) internal pure returns ( uint percentAmount_ ) {
-        return div( mul( total_, percentage_ ), 1000 );
-    }
-
-    /*
-     * Expects percentage to be trailed by 00,
-    */
-    function substractPercentage( uint total_, uint8 percentageToSub_ ) internal pure returns ( uint result_ ) {
-        return sub( total_, div( mul( total_, percentageToSub_ ), 1000 ) );
-    }
-
-    function percentageOfTotal( uint part_, uint total_ ) internal pure returns ( uint percent_ ) {
-        return div( mul(part_, 100) , total_ );
-    }
-
-    /**
-     * Taken from Hypersonic https://github.com/M2629/HyperSonic/blob/main/Math.sol
-     * @dev Returns the average of two numbers. The result is rounded towards
-     * zero.
-     */
-    function average(uint a, uint b) internal pure returns (uint) {
-        // (a + b) / 2 can overflow, so we distribute
-        return (a / 2) + (b / 2) + ((a % 2 + b % 2) / 2);
-    }
-
-    function quadraticPricing( uint payment_, uint multiplier_ ) internal pure returns (uint) {
-        return sqrrt( mul( multiplier_, payment_ ) );
-    }
-
-  function bondingCurve( uint supply_, uint multiplier_ ) internal pure returns (uint) {
-      return mul( multiplier_, supply_ );
+    // Position of the value in the `values` array, plus 1 because index 0
+    // means a value is not in the set.
+    mapping (bytes32 => uint256) _indexes;
   }
-}
-
-library Address {
-    /**
-     * @dev Returns true if `account` is a contract.
-     *
-     * [IMPORTANT]
-     * ====
-     * It is unsafe to assume that an address for which this function returns
-     * false is an externally-owned account (EOA) and not a contract.
-     *
-     * Among others, `isContract` will return false for the following
-     * types of addresses:
-     *
-     *  - an externally-owned account
-     *  - a contract in construction
-     *  - an address where a contract will be created
-     *  - an address where a contract lived, but was destroyed
-     * ====
-     */
-    function isContract(address account) internal view returns (bool) {
-        // This method relies in extcodesize, which returns 0 for contracts in
-        // construction, since the code is only stored at the end of the
-        // constructor execution.
-
-        uint size;
-        // solhint-disable-next-line no-inline-assembly
-        assembly { size := extcodesize(account) }
-        return size > 0;
-    }
-
-    /**
-     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to
-     * `recipient`, forwarding all available gas and reverting on errors.
-     *
-     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
-     * of certain opcodes, possibly making contracts go over the 2300 gas limit
-     * imposed by `transfer`, making them unable to receive funds via
-     * `transfer`. {sendValue} removes this limitation.
-     *
-     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].
-     *
-     * IMPORTANT: because control is transferred to `recipient`, care must be
-     * taken to not create reentrancy vulnerabilities. Consider using
-     * {ReentrancyGuard}
-     */
-    function sendValue(address payable recipient, uint amount) internal {
-        require(address(this).balance >= amount, "Address: insufficient balance");
-
-        // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
-        (bool success, ) = recipient.call{ value: amount }("");
-        require(success, "Address: unable to send value, recipient may have reverted");
-    }
-
-    /**
-     * @dev Performs a Solidity function call using a low level `call`. A
-     * plain`call` is an unsafe replacement for a function call: use this
-     * function instead.
-     *
-     * If `target` reverts with a revert reason, it is bubbled up by this
-     * function (like regular Solidity function calls).
-     *
-     * Requirements:
-     *
-     * - `target` must be a contract.
-     * - calling `target` with `data` must not revert.
-     *
-     * _Available since v3.1._
-     */
-    function functionCall(address target, bytes memory data) internal returns (bytes memory) {
-      return functionCall(target, data, "Address: low-level call failed");
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with
-     * `errorMessage` as a fallback revert reason when `target` reverts.
-     *
-     * _Available since v3.1._
-     */
-    function functionCall(
-        address target, 
-        bytes memory data, 
-        string memory errorMessage
-    ) internal returns (bytes memory) {
-        return _functionCallWithValue(target, data, 0, errorMessage);
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but also transferring `value` wei to `target`.
-     *
-     * Requirements:
-     *
-     * - the calling contract must have an ETH balance of at least `value`.
-     * - the called Solidity function must be `payable`.
-     *
-     * _Available since v3.1._
-     */
-    function functionCallWithValue(address target, bytes memory data, uint value) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint-}[`functionCallWithValue`], but
-     * with `errorMessage` as a fallback revert reason when `target` reverts.
-     *
-     * _Available since v3.1._
-     */
-    function functionCallWithValue(
-        address target, 
-        bytes memory data, 
-        uint value, 
-        string memory errorMessage
-    ) internal returns (bytes memory) {
-        require(address(this).balance >= value, "Address: insufficient balance for call");
-        require(isContract(target), "Address: call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.call{ value: value }(data);
-        return _verifyCallResult(success, returndata, errorMessage);
-    }
-
-    function _functionCallWithValue(
-        address target, 
-        bytes memory data, 
-        uint weiValue, 
-        string memory errorMessage
-    ) private returns (bytes memory) {
-        require(isContract(target), "Address: call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.call{ value: weiValue }(data);
-        if (success) {
-            return returndata;
-        } else {
-            // Look for revert reason and bubble it up if present
-            if (returndata.length > 0) {
-                // The easiest way to bubble the revert reason is using memory via assembly
-
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    let returndata_size := mload(returndata)
-                    revert(add(32, returndata), returndata_size)
-                }
-            } else {
-                revert(errorMessage);
-            }
-        }
-    }
 
   /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but performing a static call.
-     *
-     * _Available since v3.3._
-     */
-    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {
-        return functionStaticCall(target, data, "Address: low-level static call failed");
+   * @dev Add a value to a set. O(1).
+   *
+   * Returns true if the value was added to the set, that is if it was not
+   * already present.
+   */
+  function _add(Set storage set, bytes32 value) private returns (bool) {
+    if (!_contains(set, value)) {
+      set._values.push(value);
+      // The value is stored at length-1, but we add 1 to all indexes
+      // and use 0 as a sentinel value
+      set._indexes[value] = set._values.length;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * @dev Removes a value from a set. O(1).
+   *
+   * Returns true if the value was removed from the set, that is if it was
+   * present.
+   */
+  function _remove(Set storage set, bytes32 value) private returns (bool) {
+    // We read and store the value's index to prevent multiple reads from the same storage slot
+    uint256 valueIndex = set._indexes[value];
+
+    if (valueIndex != 0) { // Equivalent to contains(set, value)
+      // To delete an element from the _values array in O(1), we swap the element to delete with the last one in
+      // the array, and then remove the last element (sometimes called as 'swap and pop').
+      // This modifies the order of the array, as noted in {at}.
+
+      uint256 toDeleteIndex = valueIndex - 1;
+      uint256 lastIndex = set._values.length - 1;
+
+      // When the value to delete is the last one, the swap operation is unnecessary. However, since this occurs
+      // so rarely, we still do the swap anyway to avoid the gas cost of adding an 'if' statement.
+
+      bytes32 lastvalue = set._values[lastIndex];
+
+      // Move the last value to the index where the value to delete is
+      set._values[toDeleteIndex] = lastvalue;
+      // Update the index for the moved value
+      set._indexes[lastvalue] = toDeleteIndex + 1; // All indexes are 1-based
+
+      // Delete the slot where the moved value was stored
+      set._values.pop();
+
+      // Delete the index for the deleted slot
+      delete set._indexes[value];
+
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * @dev Returns true if the value is in the set. O(1).
+   */
+  function _contains(Set storage set, bytes32 value) private view returns (bool) {
+    return set._indexes[value] != 0;
+  }
+
+  /**
+   * @dev Returns the number of values on the set. O(1).
+   */
+  function _length(Set storage set) private view returns (uint256) {
+    return set._values.length;
+  }
+
+   /**
+    * @dev Returns the value stored at position `index` in the set. O(1).
+    *
+    * Note that there are no guarantees on the ordering of values inside the
+    * array, and it may change when more values are added or removed.
+    *
+    * Requirements:
+    *
+    * - `index` must be strictly less than {length}.
+    */
+  function _at(Set storage set, uint256 index) private view returns (bytes32) {
+    require(set._values.length > index, "EnumerableSet: index out of bounds");
+    return set._values[index];
+  }
+
+  function _getValues( Set storage set_ ) private view returns ( bytes32[] storage ) {
+    return set_._values;
+  }
+
+  // TODO needs insert function that maintains order.
+  // TODO needs NatSpec documentation comment.
+  /**
+   * Inserts new value by moving existing value at provided index to end 
+   * of array and setting provided value at provided index
+   */
+  function _insert(Set storage set_, uint256 index_, bytes32 valueToInsert_ ) private returns ( bool ) {
+    require(  set_._values.length > index_ );
+    require( !_contains( set_, valueToInsert_ ), "Remove value you wish to insert if you wish to reorder array." );
+    bytes32 existingValue_ = _at( set_, index_ );
+    set_._values[index_] = valueToInsert_;
+    return _add( set_, existingValue_);
+  } 
+
+  struct Bytes4Set {
+    Set _inner;
+  }
+
+  /**
+   * @dev Add a value to a set. O(1).
+   *
+   * Returns true if the value was added to the set, that is if it was not
+   * already present.
+   */
+  function add(Bytes4Set storage set, bytes4 value) internal returns (bool) {
+    return _add(set._inner, value);
+  }
+
+  /**
+   * @dev Removes a value from a set. O(1).
+   *
+   * Returns true if the value was removed from the set, that is if it was
+   * present.
+   */
+  function remove(Bytes4Set storage set, bytes4 value) internal returns (bool) {
+    return _remove(set._inner, value);
+  }
+
+  /**
+   * @dev Returns true if the value is in the set. O(1).
+   */
+  function contains(Bytes4Set storage set, bytes4 value) internal view returns (bool) {
+    return _contains(set._inner, value);
+  }
+
+  /**
+   * @dev Returns the number of values on the set. O(1).
+   */
+  function length(Bytes4Set storage set) internal view returns (uint256) {
+    return _length(set._inner);
+  }
+
+  /**
+   * @dev Returns the value stored at position `index` in the set. O(1).
+   *
+   * Note that there are no guarantees on the ordering of values inside the
+   * array, and it may change when more values are added or removed.
+   *
+   * Requirements:
+   *
+   * - `index` must be strictly less than {length}.
+   */
+  function at(Bytes4Set storage set, uint256 index) internal view returns ( bytes4 ) {
+    return bytes4( _at( set._inner, index ) );
+  }
+
+  function getValues( Bytes4Set storage set_ ) internal view returns ( bytes4[] memory ) {
+    bytes4[] memory bytes4Array_;
+    for( uint256 iteration_ = 0; _length( set_._inner ) > iteration_; iteration_++ ) {
+      bytes4Array_[iteration_] = bytes4( _at( set_._inner, iteration_ ) );
+    }
+    return bytes4Array_;
+  }
+
+  function insert( Bytes4Set storage set_, uint256 index_, bytes4 valueToInsert_ ) internal returns ( bool ) {
+    return _insert( set_._inner, index_, valueToInsert_ );
+  }
+
+    struct Bytes32Set {
+        Set _inner;
     }
 
     /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
-     * but performing a static call.
+     * @dev Add a value to a set. O(1).
      *
-     * _Available since v3.3._
+     * Returns true if the value was added to the set, that is if it was not
+     * already present.
      */
-    function functionStaticCall(
-        address target, 
-        bytes memory data, 
-        string memory errorMessage
-    ) internal view returns (bytes memory) {
-        require(isContract(target), "Address: static call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.staticcall(data);
-        return _verifyCallResult(success, returndata, errorMessage);
+    function add(Bytes32Set storage set, bytes32 value) internal returns (bool) {
+        return _add(set._inner, value);
     }
 
     /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but performing a delegate call.
+     * @dev Removes a value from a set. O(1).
      *
-     * _Available since v3.3._
+     * Returns true if the value was removed from the set, that is if it was
+     * present.
      */
-    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {
-        return functionDelegateCall(target, data, "Address: low-level delegate call failed");
+    function remove(Bytes32Set storage set, bytes32 value) internal returns (bool) {
+        return _remove(set._inner, value);
     }
 
     /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
-     * but performing a delegate call.
-     *
-     * _Available since v3.3._
+     * @dev Returns true if the value is in the set. O(1).
      */
-    function functionDelegateCall(
-        address target, 
-        bytes memory data, 
-        string memory errorMessage
-    ) internal returns (bytes memory) {
-        require(isContract(target), "Address: delegate call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.delegatecall(data);
-        return _verifyCallResult(success, returndata, errorMessage);
+    function contains(Bytes32Set storage set, bytes32 value) internal view returns (bool) {
+        return _contains(set._inner, value);
     }
 
-    function _verifyCallResult(
-        bool success, 
-        bytes memory returndata, 
-        string memory errorMessage
-    ) private pure returns(bytes memory) {
-        if (success) {
-            return returndata;
-        } else {
-            // Look for revert reason and bubble it up if present
-            if (returndata.length > 0) {
-                // The easiest way to bubble the revert reason is using memory via assembly
-
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    let returndata_size := mload(returndata)
-                    revert(add(32, returndata), returndata_size)
-                }
-            } else {
-                revert(errorMessage);
-            }
-        }
+    /**
+     * @dev Returns the number of values on the set. O(1).
+     */
+    function length(Bytes32Set storage set) internal view returns (uint256) {
+        return _length(set._inner);
     }
 
-    function addressToString(address _address) internal pure returns(string memory) {
-        bytes32 _bytes = bytes32(uint(_address));
-        bytes memory HEX = "0123456789abcdef";
-        bytes memory _addr = new bytes(42);
+    /**
+     * @dev Returns the value stored at position `index` in the set. O(1).
+     *
+     * Note that there are no guarantees on the ordering of values inside the
+     * array, and it may change when more values are added or removed.
+     *
+     * Requirements:
+     *
+     * - `index` must be strictly less than {length}.
+     */
+    function at(Bytes32Set storage set, uint256 index) internal view returns ( bytes32 ) {
+        return _at(set._inner, index);
+    }
 
-        _addr[0] = '0';
-        _addr[1] = 'x';
+  function getValues( Bytes32Set storage set_ ) internal view returns ( bytes4[] memory ) {
+    bytes4[] memory bytes4Array_;
 
-        for(uint i = 0; i < 20; i++) {
-            _addr[2+i*2] = HEX[uint8(_bytes[i + 12] >> 4)];
-            _addr[3+i*2] = HEX[uint8(_bytes[i + 12] & 0x0f)];
-        }
+      for( uint256 iteration_ = 0; _length( set_._inner ) >= iteration_; iteration_++ ){
+        bytes4Array_[iteration_] = bytes4( at( set_, iteration_ ) );
+      }
 
-        return string(_addr);
+      return bytes4Array_;
+  }
 
+  function insert( Bytes32Set storage set_, uint256 index_, bytes32 valueToInsert_ ) internal returns ( bool ) {
+    return _insert( set_._inner, index_, valueToInsert_ );
+  }
+
+  // AddressSet
+  struct AddressSet {
+    Set _inner;
+  }
+
+  /**
+   * @dev Add a value to a set. O(1).
+   *
+   * Returns true if the value was added to the set, that is if it was not
+   * already present.
+   */
+  function add(AddressSet storage set, address value) internal returns (bool) {
+    return _add(set._inner, bytes32(uint256(value)));
+  }
+
+  /**
+   * @dev Removes a value from a set. O(1).
+   *
+   * Returns true if the value was removed from the set, that is if it was
+   * present.
+   */
+  function remove(AddressSet storage set, address value) internal returns (bool) {
+    return _remove(set._inner, bytes32(uint256(value)));
+  }
+
+  /**
+   * @dev Returns true if the value is in the set. O(1).
+   */
+  function contains(AddressSet storage set, address value) internal view returns (bool) {
+    return _contains(set._inner, bytes32(uint256(value)));
+  }
+
+  /**
+   * @dev Returns the number of values in the set. O(1).
+   */
+  function length(AddressSet storage set) internal view returns (uint256) {
+    return _length(set._inner);
+  }
+
+  /**
+   * @dev Returns the value stored at position `index` in the set. O(1).
+   *
+   * Note that there are no guarantees on the ordering of values inside the
+   * array, and it may change when more values are added or removed.
+   *
+   * Requirements:
+   *
+   * - `index` must be strictly less than {length}.
+   */
+  function at(AddressSet storage set, uint256 index) internal view returns (address) {
+    return address(uint256(_at(set._inner, index)));
+  }
+
+  /**
+   * TODO Might require explicit conversion of bytes32[] to address[].
+   *  Might require iteration.
+   */
+  function getValues( AddressSet storage set_ ) internal view returns ( address[] memory ) {
+
+    address[] memory addressArray;
+
+    for( uint256 iteration_ = 0; _length(set_._inner) >= iteration_; iteration_++ ){
+      addressArray[iteration_] = at( set_, iteration_ );
+    }
+
+    return addressArray;
+  }
+
+  function insert(AddressSet storage set_, uint256 index_, address valueToInsert_ ) internal returns ( bool ) {
+    return _insert( set_._inner, index_, bytes32(uint256(valueToInsert_)) );
+  }
+
+
+    // UintSet
+
+    struct UintSet {
+        Set _inner;
+    }
+
+    /**
+     * @dev Add a value to a set. O(1).
+     *
+     * Returns true if the value was added to the set, that is if it was not
+     * already present.
+     */
+    function add(UintSet storage set, uint256 value) internal returns (bool) {
+        return _add(set._inner, bytes32(value));
+    }
+
+    /**
+     * @dev Removes a value from a set. O(1).
+     *
+     * Returns true if the value was removed from the set, that is if it was
+     * present.
+     */
+    function remove(UintSet storage set, uint256 value) internal returns (bool) {
+        return _remove(set._inner, bytes32(value));
+    }
+
+    /**
+     * @dev Returns true if the value is in the set. O(1).
+     */
+    function contains(UintSet storage set, uint256 value) internal view returns (bool) {
+        return _contains(set._inner, bytes32(value));
+    }
+
+    /**
+     * @dev Returns the number of values on the set. O(1).
+     */
+    function length(UintSet storage set) internal view returns (uint256) {
+        return _length(set._inner);
+    }
+
+   /**
+    * @dev Returns the value stored at position `index` in the set. O(1).
+    *
+    * Note that there are no guarantees on the ordering of values inside the
+    * array, and it may change when more values are added or removed.
+    *
+    * Requirements:
+    *
+    * - `index` must be strictly less than {length}.
+    */
+    function at(UintSet storage set, uint256 index) internal view returns (uint256) {
+        return uint256(_at(set._inner, index));
+    }
+
+    struct UInt256Set {
+        Set _inner;
+    }
+
+    /**
+     * @dev Add a value to a set. O(1).
+     *
+     * Returns true if the value was added to the set, that is if it was not
+     * already present.
+     */
+    function add(UInt256Set storage set, uint256 value) internal returns (bool) {
+        return _add(set._inner, bytes32(value));
+    }
+
+    /**
+     * @dev Removes a value from a set. O(1).
+     *
+     * Returns true if the value was removed from the set, that is if it was
+     * present.
+     */
+    function remove(UInt256Set storage set, uint256 value) internal returns (bool) {
+        return _remove(set._inner, bytes32(value));
+    }
+
+    /**
+     * @dev Returns true if the value is in the set. O(1).
+     */
+    function contains(UInt256Set storage set, uint256 value) internal view returns (bool) {
+        return _contains(set._inner, bytes32(value));
+    }
+
+    /**
+     * @dev Returns the number of values on the set. O(1).
+     */
+    function length(UInt256Set storage set) internal view returns (uint256) {
+        return _length(set._inner);
+    }
+
+    /**
+     * @dev Returns the value stored at position `index` in the set. O(1).
+     *
+     * Note that there are no guarantees on the ordering of values inside the
+     * array, and it may change when more values are added or removed.
+     *
+     * Requirements:
+     *
+     * - `index` must be strictly less than {length}.
+     */
+    function at(UInt256Set storage set, uint256 index) internal view returns (uint256) {
+        return uint256(_at(set._inner, index));
     }
 }
 
@@ -456,12 +439,12 @@ interface IERC20 {
   /**
    * @dev Returns the amount of tokens in existence.
    */
-  function totalSupply() external view returns (uint);
+  function totalSupply() external view returns (uint256);
 
   /**
    * @dev Returns the amount of tokens owned by `account`.
    */
-  function balanceOf(address account) external view returns (uint);
+  function balanceOf(address account) external view returns (uint256);
 
   /**
    * @dev Moves `amount` tokens from the caller's account to `recipient`.
@@ -470,7 +453,7 @@ interface IERC20 {
    *
    * Emits a {Transfer} event.
    */
-  function transfer(address recipient, uint amount) external returns (bool);
+  function transfer(address recipient, uint256 amount) external returns (bool);
 
   /**
    * @dev Returns the remaining number of tokens that `spender` will be
@@ -479,7 +462,7 @@ interface IERC20 {
    *
    * This value changes when {approve} or {transferFrom} are called.
    */
-  function allowance(address owner, address spender) external view returns (uint);
+  function allowance(address owner, address spender) external view returns (uint256);
 
   /**
    * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
@@ -495,7 +478,7 @@ interface IERC20 {
    *
    * Emits an {Approval} event.
    */
-  function approve(address spender, uint amount) external returns (bool);
+  function approve(address spender, uint256 amount) external returns (bool);
 
   /**
    * @dev Moves `amount` tokens from `sender` to `recipient` using the
@@ -506,7 +489,7 @@ interface IERC20 {
    *
    * Emits a {Transfer} event.
    */
-  function transferFrom(address sender, address recipient, uint amount) external returns (bool);
+  function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 
   /**
    * @dev Emitted when `value` tokens are moved from one account (`from`) to
@@ -514,33 +497,122 @@ interface IERC20 {
    *
    * Note that `value` may be zero.
    */
-  event Transfer(address indexed from, address indexed to, uint value);
+  event Transfer(address indexed from, address indexed to, uint256 value);
 
   /**
    * @dev Emitted when the allowance of a `spender` for an `owner` is set by
    * a call to {approve}. `value` is the new allowance.
    */
-  event Approval(address indexed owner, address indexed spender, uint value);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-abstract contract ERC20
-  is 
-    IERC20
-  {
+library SafeMath {
 
-  using SafeMath for uint;
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
+        require(c >= a, "SafeMath: addition overflow");
+
+        return c;
+    }
+
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+        return sub(a, b, "SafeMath: subtraction overflow");
+    }
+
+    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b <= a, errorMessage);
+        uint256 c = a - b;
+
+        return c;
+    }
+
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 c = a * b;
+        require(c / a == b, "SafeMath: multiplication overflow");
+
+        return c;
+    }
+
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+        return div(a, b, "SafeMath: division by zero");
+    }
+
+    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b > 0, errorMessage);
+        uint256 c = a / b;
+        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+        return c;
+    }
+
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+        return mod(a, b, "SafeMath: modulo by zero");
+    }
+
+    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b != 0, errorMessage);
+        return a % b;
+    }
+
+    function sqrrt(uint256 a) internal pure returns (uint c) {
+        if (a > 3) {
+            c = a;
+            uint b = add( div( a, 2), 1 );
+            while (b < c) {
+                c = b;
+                b = div( add( div( a, b ), b), 2 );
+            }
+        } else if (a != 0) {
+            c = 1;
+        }
+    }
+
+    function percentageAmount( uint256 total_, uint8 percentage_ ) internal pure returns ( uint256 percentAmount_ ) {
+        return div( mul( total_, percentage_ ), 1000 );
+    }
+
+    function substractPercentage( uint256 total_, uint8 percentageToSub_ ) internal pure returns ( uint256 result_ ) {
+        return sub( total_, div( mul( total_, percentageToSub_ ), 1000 ) );
+    }
+
+    function percentageOfTotal( uint256 part_, uint256 total_ ) internal pure returns ( uint256 percent_ ) {
+        return div( mul(part_, 100) , total_ );
+    }
+
+    function average(uint256 a, uint256 b) internal pure returns (uint256) {
+        // (a + b) / 2 can overflow, so we distribute
+        return (a / 2) + (b / 2) + ((a % 2 + b % 2) / 2);
+    }
+
+    function quadraticPricing( uint256 payment_, uint256 multiplier_ ) internal pure returns (uint256) {
+        return sqrrt( mul( multiplier_, payment_ ) );
+    }
+
+  function bondingCurve( uint256 supply_, uint256 multiplier_ ) internal pure returns (uint256) {
+      return mul( multiplier_, supply_ );
+  }
+}
+
+abstract contract ERC20 is IERC20 {
+
+  using SafeMath for uint256;
 
   // TODO comment actual hash value.
   bytes32 constant private ERC20TOKEN_ERC1820_INTERFACE_ID = keccak256( "ERC20Token" );
     
   // Present in ERC777
-  mapping (address => uint) internal _balances;
+  mapping (address => uint256) internal _balances;
 
   // Present in ERC777
-  mapping (address => mapping (address => uint)) internal _allowances;
+  mapping (address => mapping (address => uint256)) internal _allowances;
 
   // Present in ERC777
-  uint internal _totalSupply;
+  uint256 internal _totalSupply;
 
   // Present in ERC777
   string internal _name;
@@ -551,222 +623,84 @@ abstract contract ERC20
   // Present in ERC777
   uint8 internal _decimals;
 
-  /**
-   * @dev Sets the values for {name} and {symbol}, initializes {decimals} with
-   * a default value of 18.
-   *
-   * To select a different value for {decimals}, use {_setupDecimals}.
-   *
-   * All three of these values are immutable: they can only be set once during
-   * construction.
-   */
   constructor (string memory name_, string memory symbol_, uint8 decimals_) {
     _name = name_;
     _symbol = symbol_;
     _decimals = decimals_;
   }
 
-  /**
-   * @dev Returns the name of the token.
-   */
-  // Present in ERC777
   function name() public view returns (string memory) {
     return _name;
   }
 
-  /**
-   * @dev Returns the symbol of the token, usually a shorter version of the
-   * name.
-   */
-  // Present in ERC777
   function symbol() public view returns (string memory) {
     return _symbol;
   }
 
-  /**
-   * @dev Returns the number of decimals used to get its user representation.
-   * For example, if `decimals` equals `2`, a balance of `505` tokens should
-   * be displayed to a user as `5,05` (`505 / 10 ** 2`).
-   *
-   * Tokens usually opt for a value of 18, imitating the relationship between
-   * Ether and Wei. This is the value {ERC20} uses, unless {_setupDecimals} is
-   * called.
-   *
-   * NOTE: This information is only used for _display_ purposes: it in
-   * no way affects any of the arithmetic of the contract, including
-   * {IERC20-balanceOf} and {IERC20-transfer}.
-   */
-  // Present in ERC777
   function decimals() public view returns (uint8) {
     return _decimals;
   }
 
-  /**
-   * @dev See {IERC20-totalSupply}.
-   */
-  // Present in ERC777
-  function totalSupply() public view override returns (uint) {
+  function totalSupply() public view override returns (uint256) {
     return _totalSupply;
   }
 
-  /**
-   * @dev See {IERC20-balanceOf}.
-   */
-  // Present in ERC777
-  function balanceOf(address account) public view virtual override returns (uint) {
+  function balanceOf(address account) public view virtual override returns (uint256) {
     return _balances[account];
   }
 
-  /**
-   * @dev See {IERC20-transfer}.
-   *
-   * Requirements:
-   *
-   * - `recipient` cannot be the zero address.
-   * - the caller must have a balance of at least `amount`.
-   */
-  // Overrideen in ERC777
-  // Confirm that this behavior changes 
-  function transfer(address recipient, uint amount) public virtual override returns (bool) {
+  function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
     _transfer(msg.sender, recipient, amount);
     return true;
   }
 
-    /**
-     * @dev See {IERC20-allowance}.
-     */
-    // Present in ERC777
-    function allowance(address owner, address spender) public view virtual override returns (uint) {
+    function allowance(address owner, address spender) public view virtual override returns (uint256) {
         return _allowances[owner][spender];
     }
 
-    /**
-     * @dev See {IERC20-approve}.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     */
-    // Present in ERC777
-    function approve(address spender, uint amount) public virtual override returns (bool) {
+    function approve(address spender, uint256 amount) public virtual override returns (bool) {
         _approve(msg.sender, spender, amount);
         return true;
     }
 
-    /**
-     * @dev See {IERC20-transferFrom}.
-     *
-     * Emits an {Approval} event indicating the updated allowance. This is not
-     * required by the EIP. See the note at the beginning of {ERC20}.
-     *
-     * Requirements:
-     *
-     * - `sender` and `recipient` cannot be the zero address.
-     * - `sender` must have a balance of at least `amount`.
-     * - the caller must have allowance for ``sender``'s tokens of at least
-     * `amount`.
-     */
-    // Present in ERC777
-    function transferFrom(address sender, address recipient, uint amount) public virtual override returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
         _transfer(sender, recipient, amount);
         _approve(sender, msg.sender, _allowances[sender][msg.sender]
-            .sub(amount, "ERC20: transfer amount exceeds allowance"));
+          .sub(amount, "ERC20: transfer amount exceeds allowance"));
         return true;
     }
 
-    /**
-     * @dev Atomically increases the allowance granted to `spender` by the caller.
-     *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {IERC20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     */
-    function increaseAllowance(address spender, uint addedValue) public virtual returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
         _approve(msg.sender, spender, _allowances[msg.sender][spender].add(addedValue));
         return true;
     }
 
-    /**
-     * @dev Atomically decreases the allowance granted to `spender` by the caller.
-     *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {IERC20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     * - `spender` must have allowance for the caller of at least
-     * `subtractedValue`.
-     */
-    function decreaseAllowance(address spender, uint subtractedValue) public virtual returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
         _approve(msg.sender, spender, _allowances[msg.sender][spender]
-            .sub(subtractedValue, "ERC20: decreased allowance below zero"));
+          .sub(subtractedValue, "ERC20: decreased allowance below zero"));
         return true;
     }
 
-  /**
-   * @dev Moves tokens `amount` from `sender` to `recipient`.
-   *
-   * This is internal function is equivalent to {transfer}, and can be used to
-   * e.g. implement automatic token fees, slashing mechanisms, etc.
-   *
-   * Emits a {Transfer} event.
-   *
-   * Requirements:
-   *
-   * - `sender` cannot be the zero address.
-   * - `recipient` cannot be the zero address.
-   * - `sender` must have a balance of at least `amount`.
-   */
-  function _transfer(address sender, address recipient, uint amount) internal virtual {
-    require(sender != address(0), "ERC20: transfer from the zero address");
-    require(recipient != address(0), "ERC20: transfer to the zero address");
+    function _transfer(address sender, address recipient, uint256 amount) internal virtual {
+      require(sender != address(0), "ERC20: transfer from the zero address");
+      require(recipient != address(0), "ERC20: transfer to the zero address");
 
-    _beforeTokenTransfer(sender, recipient, amount);
+      _beforeTokenTransfer(sender, recipient, amount);
 
-    _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
-    _balances[recipient] = _balances[recipient].add(amount);
-    emit Transfer(sender, recipient, amount);
-  }
-
-    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
-     * the total supply.
-     *
-     * Emits a {Transfer} event with `from` set to the zero address.
-     *
-     * Requirements:
-     *
-     * - `to` cannot be the zero address.
-     */
-    // Present in ERC777
-    function _mint(address account_, uint ammount_) internal virtual {
-        require(account_ != address(0), "ERC20: mint to the zero address");
-        _beforeTokenTransfer(address( this ), account_, ammount_);
-        _totalSupply = _totalSupply.add(ammount_);
-        _balances[account_] = _balances[account_].add(ammount_);
-        emit Transfer(address( this ), account_, ammount_);
+      _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
+      _balances[recipient] = _balances[recipient].add(amount);
+      emit Transfer(sender, recipient, amount);
     }
 
-    /**
-     * @dev Destroys `amount` tokens from `account`, reducing the
-     * total supply.
-     *
-     * Emits a {Transfer} event with `to` set to the zero address.
-     *
-     * Requirements:
-     *
-     * - `account` cannot be the zero address.
-     * - `account` must have at least `amount` tokens.
-     */
-    // Present in ERC777
-    function _burn(address account, uint amount) internal virtual {
+    function _mint(address account_, uint256 amount_) internal virtual {
+        require(account_ != address(0), "ERC20: mint to the zero address");
+        _beforeTokenTransfer(address( this ), account_, amount_);
+        _totalSupply = _totalSupply.add(amount_);
+        _balances[account_] = _balances[account_].add(amount_);
+        emit Transfer(address( this ), account_, amount_);
+    }
+
+    function _burn(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: burn from the zero address");
 
         _beforeTokenTransfer(account, address(0), amount);
@@ -776,21 +710,7 @@ abstract contract ERC20
         emit Transfer(account, address(0), amount);
     }
 
-    /**
-     * @dev Sets `amount` as the allowance of `spender` over the `owner` s tokens.
-     *
-     * This internal function is equivalent to `approve`, and can be used to
-     * e.g. set automatic allowances for certain subsystems, etc.
-     *
-     * Emits an {Approval} event.
-     *
-     * Requirements:
-     *
-     * - `owner` cannot be the zero address.
-     * - `spender` cannot be the zero address.
-     */
-    // Present in ERC777
-    function _approve(address owner, address spender, uint amount) internal virtual {
+    function _approve(address owner, address spender, uint256 amount) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
@@ -798,48 +718,21 @@ abstract contract ERC20
         emit Approval(owner, spender, amount);
     }
 
-    /**
-     * @dev Sets {decimals} to a value other than the default one of 18.
-     *
-     * WARNING: This function should only be called from the constructor. Most
-     * applications that interact with token contracts will not expect
-     * {decimals} to ever change, and may work incorrectly if it does.
-     */
-
-  /**
-   * @dev Hook that is called before any transfer of tokens. This includes
-   * minting and burning.
-   *
-   * Calling conditions:
-   *
-   * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
-   * will be to transferred to `to`.
-   * - when `from` is zero, `amount` tokens will be minted for `to`.
-   * - when `to` is zero, `amount` of ``from``'s tokens will be burned.
-   * - `from` and `to` are never both zero.
-   *
-   * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-   */
-  // Present in ERC777
-  function _beforeTokenTransfer( address from_, address to_, uint amount_ ) internal virtual { }
+  function _beforeTokenTransfer( address from_, address to_, uint256 amount_ ) internal virtual { }
 }
 
 library Counters {
-    using SafeMath for uint;
+    using SafeMath for uint256;
 
     struct Counter {
-        // This variable should never be directly accessed by users of the library: interactions must be restricted to
-        // the library's function. As of Solidity v0.5.2, this cannot be enforced, though there is a proposal to add
-        // this feature: see https://github.com/ethereum/solidity/issues/4637
-        uint _value; // default: 0
+        uint256 _value; // default: 0
     }
 
-    function current(Counter storage counter) internal view returns (uint) {
+    function current(Counter storage counter) internal view returns (uint256) {
         return counter._value;
     }
 
     function increment(Counter storage counter) internal {
-        // The {SafeMath} overflow check can be skipped here, see the comment at the top
         counter._value += 1;
     }
 
@@ -849,46 +742,18 @@ library Counters {
 }
 
 interface IERC2612Permit {
-    /**
-     * @dev Sets `amount` as the allowance of `spender` over `owner`'s tokens,
-     * given `owner`'s signed approval.
-     *
-     * IMPORTANT: The same issues {IERC20-approve} has related to transaction
-     * ordering also apply here.
-     *
-     * Emits an {Approval} event.
-     *
-     * Requirements:
-     *
-     * - `owner` cannot be the zero address.
-     * - `spender` cannot be the zero address.
-     * - `deadline` must be a timestamp in the future.
-     * - `v`, `r` and `s` must be a valid `secp256k1` signature from `owner`
-     * over the EIP712-formatted function arguments.
-     * - the signature must use ``owner``'s current nonce (see {nonces}).
-     *
-     * For more information on the signature format, see the
-     * https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP
-     * section].
-     */
+
     function permit(
         address owner,
         address spender,
-        uint amount,
-        uint deadline,
+        uint256 amount,
+        uint256 deadline,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) external;
 
-    /**
-     * @dev Returns the current ERC2612 nonce for `owner`. This value must be
-     * included whenever a signature is generated for {permit}.
-     *
-     * Every successful call to {permit} increases ``owner``'s nonce by one. This
-     * prevents a signature from being used multiple times.
-     */
-    function nonces(address owner) external view returns (uint);
+    function nonces(address owner) external view returns (uint256);
 }
 
 abstract contract ERC20Permit is ERC20, IERC2612Permit {
@@ -896,36 +761,33 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
 
     mapping(address => Counters.Counter) private _nonces;
 
-    // keccak256("Permit(address owner,address spender,uint value,uint nonce,uint deadline)");
+    // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
     bytes32 public DOMAIN_SEPARATOR;
 
     constructor() {
-
-        uint chainID;
+        uint256 chainID;
         assembly {
             chainID := chainid()
         }
 
-        DOMAIN_SEPARATOR = keccak256(abi.encode(
-            keccak256("EIP712Domain(string name,string version,uint chainId,address verifyingContract)"),
-            keccak256(bytes(name())),
-            keccak256(bytes("1")), // Version
-            chainID,
-            address(this)
-        ));
+        DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256(bytes(name())),
+                keccak256(bytes("1")), // Version
+                chainID,
+                address(this)
+            )
+        );
     }
 
-    /**
-     * @dev See {IERC2612Permit-permit}.
-     *
-     */
     function permit(
         address owner,
         address spender,
-        uint amount,
-        uint deadline,
+        uint256 amount,
+        uint256 deadline,
         uint8 v,
         bytes32 r,
         bytes32 s
@@ -944,262 +806,99 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
         _approve(owner, spender, amount);
     }
 
-    /**
-     * @dev See {IERC2612Permit-nonces}.
-     */
-    function nonces(address owner) public view override returns (uint) {
+    function nonces(address owner) public view override returns (uint256) {
         return _nonces[owner].current();
     }
 }
 
 interface IOwnable {
-  function manager() external view returns (address);
+  function owner() external view returns (address);
 
-  function renounceManagement() external;
+  function renounceOwnership() external;
   
-  function pushManagement( address newOwner_ ) external;
-  
-  function pullManagement() external;
+  function transferOwnership( address newOwner_ ) external;
 }
 
 contract Ownable is IOwnable {
-
-    address internal _owner;
-    address internal _newOwner;
-
-    event OwnershipPushed(address indexed previousOwner, address indexed newOwner);
-    event OwnershipPulled(address indexed previousOwner, address indexed newOwner);
-
-    constructor () {
-        _owner = msg.sender;
-        emit OwnershipPushed( address(0), _owner );
-    }
-
-    function manager() public view override returns (address) {
-        return _owner;
-    }
-
-    modifier onlyManager() {
-        require( _owner == msg.sender, "Ownable: caller is not the owner" );
-        _;
-    }
-
-    function renounceManagement() public virtual override onlyManager() {
-        emit OwnershipPushed( _owner, address(0) );
-        _owner = address(0);
-    }
-
-    function pushManagement( address newOwner_ ) public virtual override onlyManager() {
-        require( newOwner_ != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipPushed( _owner, newOwner_ );
-        _newOwner = newOwner_;
-    }
     
-    function pullManagement() public virtual override {
-        require( msg.sender == _newOwner, "Ownable: must be new owner to pull");
-        emit OwnershipPulled( _owner, _newOwner );
-        _owner = _newOwner;
-    }
+  address internal _owner;
+
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+  constructor () {
+    _owner = msg.sender;
+    emit OwnershipTransferred( address(0), _owner );
+  }
+
+  function owner() public view override returns (address) {
+    return _owner;
+  }
+
+  modifier onlyOwner() {
+    require( _owner == msg.sender, "Ownable: caller is not the owner" );
+    _;
+  }
+
+  function renounceOwnership() public virtual override onlyOwner() {
+    emit OwnershipTransferred( _owner, address(0) );
+    _owner = address(0);
+  }
+
+  function transferOwnership( address newOwner_ ) public virtual override onlyOwner() {
+    require( newOwner_ != address(0), "Ownable: new owner is the zero address");
+    emit OwnershipTransferred( _owner, newOwner_ );
+    _owner = newOwner_;
+  }
 }
 
-contract Luxor is ERC20Permit, Ownable {
+contract VaultOwned is Ownable {
+    
+  address internal _vault;
 
-    using SafeMath for uint;
+  function setVault( address vault_ ) external onlyOwner() returns ( bool ) {
+    _vault = vault_;
 
-    modifier onlyStakingContract() {
-        require( msg.sender == stakingContract );
-        _;
+    return true;
+  }
+
+  function vault() public view returns (address) {
+    return _vault;
+  }
+
+  modifier onlyVault() {
+    require( _vault == msg.sender, "VaultOwned: caller is not the Vault" );
+    _;
+  }
+
+}
+
+contract Luxor is ERC20Permit, VaultOwned {
+
+    using SafeMath for uint256;
+
+    constructor() ERC20("Luxor", "LUX", 9) {
     }
 
-    address public stakingContract;
-    address public initializer;
-
-    event LogSupply(uint indexed epoch, uint timestamp, uint totalSupply );
-    event LogRebase( uint indexed epoch, uint rebase, uint index );
-    event LogStakingContractUpdated( address stakingContract );
-
-    struct Rebase {
-        uint epoch;
-        uint rebase; // 18 decimals
-        uint totalStakedBefore;
-        uint totalStakedAfter;
-        uint amountRebased;
-        uint index;
-        uint32 timeOccured;
-    }
-    Rebase[] public rebases;
-
-    uint public INDEX;
-
-    uint private constant MAX_UINT256 = ~uint(0);
-    uint private constant INITIAL_FRAGMENTS_SUPPLY = 5000000 * 10**9;
-
-    // TOTAL_GONS is a multiple of INITIAL_FRAGMENTS_SUPPLY so that _gonsPerFragment is an integer.
-    // Use the highest value that fits in a uint for max granularity.
-    uint private constant TOTAL_GONS = MAX_UINT256 - (MAX_UINT256 % INITIAL_FRAGMENTS_SUPPLY);
-
-    // MAX_SUPPLY = maximum integer < (sqrt(4*TOTAL_GONS + 1) - 1) / 2
-    uint private constant MAX_SUPPLY = ~uint128(0);  // (2^128) - 1
-
-    uint private _gonsPerFragment;
-    mapping(address => uint) private _gonBalances;
-
-    mapping ( address => mapping ( address => uint ) ) private _allowedValue;
-
-    constructor() ERC20("Luxor", "LUX", 9) ERC20Permit() {
-        initializer = msg.sender;
-        _totalSupply = INITIAL_FRAGMENTS_SUPPLY;
-        _gonsPerFragment = TOTAL_GONS.div(_totalSupply);
+    function mint(address account_, uint256 amount_) external onlyVault() {
+        _mint(account_, amount_);
     }
 
-    function initialize( address stakingContract_ ) external returns ( bool ) {
-        require( msg.sender == initializer );
-        require( stakingContract_ != address(0) );
-        stakingContract = stakingContract_;
-        _gonBalances[ stakingContract ] = TOTAL_GONS;
-
-        emit Transfer( address(0x0), stakingContract, _totalSupply );
-        emit LogStakingContractUpdated( stakingContract_ );
-        
-        initializer = address(0);
-        return true;
+    function burn(uint256 amount) public virtual {
+        _burn(msg.sender, amount);
+    }
+     
+    function burnFrom(address account_, uint256 amount_) public virtual {
+        _burnFrom(account_, amount_);
     }
 
-    function setIndex( uint _INDEX ) external onlyManager() returns ( bool ) {
-        require( INDEX == 0 );
-        INDEX = gonsForBalance( _INDEX );
-        return true;
-    }
+    function _burnFrom(address account_, uint256 amount_) public virtual {
+        uint256 decreasedAllowance_ =
+            allowance(account_, msg.sender).sub(
+                amount_,
+                "ERC20: burn amount exceeds allowance"
+            );
 
-    /**
-        @notice increases Luxor supply to increase staking balances relative to profit_
-        @param profit_ uint
-        @return uint
-     */
-    function rebase( uint profit_, uint epoch_ ) public onlyStakingContract() returns ( uint ) {
-        uint rebaseAmount;
-        uint circulatingSupply_ = circulatingSupply();
-
-        if ( profit_ == 0 ) {
-            emit LogSupply( epoch_, block.timestamp, _totalSupply );
-            emit LogRebase( epoch_, 0, index() );
-            return _totalSupply;
-        } else if ( circulatingSupply_ > 0 ){
-            rebaseAmount = profit_.mul( _totalSupply ).div( circulatingSupply_ );
-        } else {
-            rebaseAmount = profit_;
-        }
-
-        _totalSupply = _totalSupply.add( rebaseAmount );
-
-        if ( _totalSupply > MAX_SUPPLY ) {
-            _totalSupply = MAX_SUPPLY;
-        }
-
-        _gonsPerFragment = TOTAL_GONS.div( _totalSupply );
-
-        _storeRebase( circulatingSupply_, profit_, epoch_ );
-
-        return _totalSupply;
-    }
-
-    /**
-        @notice emits event with data about rebase
-        @param previousCirculating_ uint
-        @param profit_ uint
-        @param epoch_ uint
-        @return bool
-     */
-    function _storeRebase( uint previousCirculating_, uint profit_, uint epoch_ ) internal returns ( bool ) {
-        uint rebasePercent = profit_.mul( 1e18 ).div( previousCirculating_ );
-
-        rebases.push( Rebase ( {
-            epoch: epoch_,
-            rebase: rebasePercent, // 18 decimals
-            totalStakedBefore: previousCirculating_,
-            totalStakedAfter: circulatingSupply(),
-            amountRebased: profit_,
-            index: index(),
-            timeOccured: uint32(block.timestamp)
-        }));
-        
-        emit LogSupply( epoch_, block.timestamp, _totalSupply );
-        emit LogRebase( epoch_, rebasePercent, index() );
-
-        return true;
-    }
-
-    function balanceOf( address who ) public view override returns ( uint ) {
-        return _gonBalances[ who ].div( _gonsPerFragment );
-    }
-
-    function gonsForBalance( uint amount ) public view returns ( uint ) {
-        return amount.mul( _gonsPerFragment );
-    }
-
-    function balanceForGons( uint gons ) public view returns ( uint ) {
-        return gons.div( _gonsPerFragment );
-    }
-
-    // Staking contract holds excess Luxor
-    function circulatingSupply() public view returns ( uint ) {
-        return _totalSupply.sub( balanceOf( stakingContract ) );
-    }
-
-    function index() public view returns ( uint ) {
-        return balanceForGons( INDEX );
-    }
-
-    function transfer( address to, uint value ) public override returns (bool) {
-        uint gonValue = value.mul( _gonsPerFragment );
-        _gonBalances[ msg.sender ] = _gonBalances[ msg.sender ].sub( gonValue );
-        _gonBalances[ to ] = _gonBalances[ to ].add( gonValue );
-        emit Transfer( msg.sender, to, value );
-        return true;
-    }
-
-    function allowance( address owner_, address spender ) public view override returns ( uint ) {
-        return _allowedValue[ owner_ ][ spender ];
-    }
-
-    function transferFrom( address from, address to, uint value ) public override returns ( bool ) {
-       _allowedValue[ from ][ msg.sender ] = _allowedValue[ from ][ msg.sender ].sub( value );
-       emit Approval( from, msg.sender,  _allowedValue[ from ][ msg.sender ] );
-
-        uint gonValue = gonsForBalance( value );
-        _gonBalances[ from ] = _gonBalances[from].sub( gonValue );
-        _gonBalances[ to ] = _gonBalances[to].add( gonValue );
-        emit Transfer( from, to, value );
-
-        return true;
-    }
-
-    function approve( address spender, uint value ) public override returns (bool) {
-         _allowedValue[ msg.sender ][ spender ] = value;
-         emit Approval( msg.sender, spender, value );
-         return true;
-    }
-
-    // What gets called in a permit
-    function _approve( address owner, address spender, uint value ) internal override virtual {
-        _allowedValue[owner][spender] = value;
-        emit Approval( owner, spender, value );
-    }
-
-    function increaseAllowance( address spender, uint addedValue ) public override returns (bool) {
-        _allowedValue[ msg.sender ][ spender ] = _allowedValue[ msg.sender ][ spender ].add( addedValue );
-        emit Approval( msg.sender, spender, _allowedValue[ msg.sender ][ spender ] );
-        return true;
-    }
-
-    function decreaseAllowance( address spender, uint subtractedValue ) public override returns (bool) {
-        uint oldValue = _allowedValue[ msg.sender ][ spender ];
-        if (subtractedValue >= oldValue) {
-            _allowedValue[ msg.sender ][ spender ] = 0;
-        } else {
-            _allowedValue[ msg.sender ][ spender ] = oldValue.sub( subtractedValue );
-        }
-        emit Approval( msg.sender, spender, _allowedValue[ msg.sender ][ spender ] );
-        return true;
+        _approve(account_, msg.sender, decreasedAllowance_);
+        _burn(account_, amount_);
     }
 }

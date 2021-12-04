@@ -781,14 +781,14 @@ interface IWETH {
     function deposit() external payable;
 }
 
-interface IUniswapV2Factory {
+interface ISoulSwapFactory {
     function getPair(address tokenA, address tokenB)
         external
         view
         returns (address);
 }
 
-interface IUniswapV2Router02 {
+interface ISoulSwapRouter {
     function addLiquidity(
         address tokenA,
         address tokenB,
@@ -815,7 +815,7 @@ interface IUniswapV2Router02 {
     ) external returns (uint256[] memory amounts);
 }
 
-interface IUniswapV2Pair {
+interface ISoulSwapPair {
     function token0() external pure returns (address);
 
     function token1() external pure returns (address);
@@ -840,11 +840,11 @@ contract LuxorZapIn is ZapInBaseV3_1 {
     mapping (ILuxorBondDepository => address) public allowedPairs;
     mapping (ILuxorBondDepository => address) public allowedReserves;
 
-    IUniswapV2Factory private constant SoulSwapFactory =
-        IUniswapV2Factory(0x1120e150dA9def6Fe930f4fEDeD18ef57c0CA7eF);
+    ISoulSwapFactory private constant SoulSwapFactory =
+        ISoulSwapFactory(0x1120e150dA9def6Fe930f4fEDeD18ef57c0CA7eF);
 
-    IUniswapV2Router02 private constant SoulSwapRouter =
-        IUniswapV2Router02(0x6b3d631B87FE27aF29efeC61d2ab8CE4d621cCBF);
+    ISoulSwapRouter private constant SoulSwapRouter =
+        ISoulSwapRouter(0x6b3d631B87FE27aF29efeC61d2ab8CE4d621cCBF);
 
     address private constant wftmTokenAddress =
         address(0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83);
@@ -858,12 +858,12 @@ contract LuxorZapIn is ZapInBaseV3_1 {
         approvedTargets[0xDEF189DeAEF76E379df891899eb5A00a94cBC250] = true;
 
         //allowedPairs
-        allowedPairs[ILuxorBondDepository(0xD1aBB2e4b53BFfba07eE8c13D9Ea02EE2b5F45df)] = 0x977d428e3Fca17118ed3d68907845591fB2B7fd7; // BondDepository | Principle (FTM-LUX)
-        allowedPairs[ILuxorBondDepository(0x115D63A73Ab988b5f8a2bc61682803D82bbe01b0)] = 0xf21e7307F8A0C18bF72fe3880EFe82868cC7EeB5; // BondDepository | Principle (DAI-LUX)
+        allowedPairs[ILuxorBondDepository(0x6fB6368e59621eD69639a44C7b39930780cCCE51)] = 0x951BBB838e49F7081072895947735b0892cCcbCD; // BondDepository | Principle (FTM-LUX)
+        allowedPairs[ILuxorBondDepository(0x194C771f142751A0368aE9E92dC4eF7E0B5327D5)] = 0x46729c2AeeabE7774a0E710867df80a6E19Ef851; // BondDepository | Principle (DAI-LUX)
 
         //allowedReserves
-        allowedReserves[ILuxorBondDepository(0xe36B6905ED81141CCE7f4B67d28EFBf5E6a26d0B)] = 0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E; // BondDepository | DAI
-        allowedReserves[ILuxorBondDepository(0xa2967b2DACa73cE9D1f89f399F9B8E9810C20934)] = 0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83; // BondDepository | WFTM
+        allowedReserves[ILuxorBondDepository(0x60509400CFC30f3F468630EfD8bB08D864564D72)] = 0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83; // BondDepository | WFTM
+        allowedReserves[ILuxorBondDepository(0x4D30bF2166B2F4eB61913Bdff00d67D8BA0657E1)] = 0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E; // BondDepository | DAI
     }
 
     event zapIn(
@@ -983,9 +983,9 @@ contract LuxorZapIn is ZapInBaseV3_1 {
         pure
         returns (address token0, address token1)
     {
-        IUniswapV2Pair uniPair = IUniswapV2Pair(_pairAddress);
-        token0 = uniPair.token0();
-        token1 = uniPair.token1();
+        ISoulSwapPair soulPair = ISoulSwapPair(_pairAddress);
+        token0 = soulPair.token0();
+        token1 = soulPair.token1();
     }
 
     function _performZapInLp(
@@ -998,12 +998,12 @@ contract LuxorZapIn is ZapInBaseV3_1 {
     ) internal returns (uint256) {
         uint256 intermediateAmt;
         address intermediateToken;
-        (address _ToUniswapToken0, address _ToUniswapToken1) =
+        (address _ToSoulSwapToken0, address _ToSoulSwapToken1) =
             _getPairTokens(_pairAddress);
 
         if (
-            _FromTokenContractAddress != _ToUniswapToken0 &&
-            _FromTokenContractAddress != _ToUniswapToken1
+            _FromTokenContractAddress != _ToSoulSwapToken0 &&
+            _FromTokenContractAddress != _ToSoulSwapToken1
         ) {
             // swap to intermediate
             (intermediateAmt, intermediateToken) = _fillQuoteLp(
@@ -1022,35 +1022,35 @@ contract LuxorZapIn is ZapInBaseV3_1 {
         (uint256 token0Bought, uint256 token1Bought) =
             _swapIntermediate(
                 intermediateToken,
-                _ToUniswapToken0,
-                _ToUniswapToken1,
+                _ToSoulSwapToken0,
+                _ToSoulSwapToken1,
                 intermediateAmt
             );
 
         return
-            _uniDeposit(
-                _ToUniswapToken0,
-                _ToUniswapToken1,
+            _soulDeposit(
+                _ToSoulSwapToken0,
+                _ToSoulSwapToken1,
                 token0Bought,
                 token1Bought,
                 transferResidual
             );
     }
 
-    function _uniDeposit(
-        address _ToUnipoolToken0,
-        address _ToUnipoolToken1,
+    function _soulDeposit(
+        address _ToSoulpoolToken0,
+        address _ToSoulpoolToken1,
         uint256 token0Bought,
         uint256 token1Bought,
         bool transferResidual
     ) internal returns (uint256) {
-        _approveToken(_ToUnipoolToken0, address(SoulSwapRouter), token0Bought);
-        _approveToken(_ToUnipoolToken1, address(SoulSwapRouter), token1Bought);
+        _approveToken(_ToSoulpoolToken0, address(SoulSwapRouter), token0Bought);
+        _approveToken(_ToSoulpoolToken1, address(SoulSwapRouter), token1Bought);
 
         (uint256 amountA, uint256 amountB, uint256 LP) =
             SoulSwapRouter.addLiquidity(
-                _ToUnipoolToken0,
-                _ToUnipoolToken1,
+                _ToSoulpoolToken0,
+                _ToSoulpoolToken1,
                 token0Bought,
                 token1Bought,
                 1,
@@ -1062,7 +1062,7 @@ contract LuxorZapIn is ZapInBaseV3_1 {
         if (transferResidual) {
             //Returning Residue in token0, if any.
             if (token0Bought - amountA > 0) {
-                IERC20(_ToUnipoolToken0).safeTransfer(
+                IERC20(_ToSoulpoolToken0).safeTransfer(
                     msg.sender,
                     token0Bought - amountA
                 );
@@ -1070,7 +1070,7 @@ contract LuxorZapIn is ZapInBaseV3_1 {
 
             //Returning Residue in token1, if any
             if (token1Bought - amountB > 0) {
-                IERC20(_ToUnipoolToken1).safeTransfer(
+                IERC20(_ToSoulpoolToken1).safeTransfer(
                     msg.sender,
                     token1Bought - amountB
                 );
@@ -1160,22 +1160,22 @@ contract LuxorZapIn is ZapInBaseV3_1 {
 
     function _swapIntermediate(
         address _toContractAddress,
-        address _ToUnipoolToken0,
-        address _ToUnipoolToken1,
+        address _ToSoulpoolToken0,
+        address _ToSoulpoolToken1,
         uint256 _amount
     ) internal returns (uint256 token0Bought, uint256 token1Bought) {
-        IUniswapV2Pair pair =
-            IUniswapV2Pair(
-                SoulSwapFactory.getPair(_ToUnipoolToken0, _ToUnipoolToken1)
+        ISoulSwapPair pair =
+            ISoulSwapPair(
+                SoulSwapFactory.getPair(_ToSoulpoolToken0, _ToSoulpoolToken1)
             );
         (uint256 res0, uint256 res1, ) = pair.getReserves();
-        if (_toContractAddress == _ToUnipoolToken0) {
+        if (_toContractAddress == _ToSoulpoolToken0) {
             uint256 amountToSwap = calculateSwapInAmount(res0, _amount);
             //if no reserve or a new pair is created
             if (amountToSwap <= 0) amountToSwap = _amount / 2;
             token1Bought = _token2Token(
                 _toContractAddress,
-                _ToUnipoolToken1,
+                _ToSoulpoolToken1,
                 amountToSwap
             );
             token0Bought = _amount - amountToSwap;
@@ -1185,7 +1185,7 @@ contract LuxorZapIn is ZapInBaseV3_1 {
             if (amountToSwap <= 0) amountToSwap = _amount / 2;
             token0Bought = _token2Token(
                 _toContractAddress,
-                _ToUnipoolToken0,
+                _ToSoulpoolToken0,
                 amountToSwap
             );
             token1Bought = _amount - amountToSwap;
