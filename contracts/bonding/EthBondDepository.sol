@@ -674,7 +674,7 @@ interface IWETH9 is IERC20 {
     function deposit() external payable;
 }
 
-contract LuxorBondDepository is Ownable {
+contract EthBondDepository is Ownable {
 
     using FixedPoint for *;
     using SafeERC20 for IERC20;

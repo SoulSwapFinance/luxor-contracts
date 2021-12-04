@@ -44,8 +44,8 @@ Smart contracts for the LUX and LUM tokens.
 
 
 ### Staking Contracts
-- [LuxorStaking.sol](https://ftmscan.com/address/0x50faF4694E83B1aa6848a3F0aF56Bc3283C2Cfae#code)
-- [StakingHelper.sol](https://ftmscan.com/address/0xa273C79b081fC6cd5E1a44fEB79EaEa56e6dE992#code)
+- [LuxorStaking.sol](https://ftmscan.com/address/0xf3F0BCFd430085e198466cdCA4Db8C2Af47f0802#code)
+- [StakingHelper.sol](https://ftmscan.com/address/0x49a359BB873E4DfC9B07b3E32ee404c4e8ED14e7#code)
 
 ### Bonding Contracts
 - [LuxorBondingCalculator.sol](https://ftmscan.com/address/0x6e2bd6d4654226C752A0bC753A3f9Cd6F569B6cB#code)
