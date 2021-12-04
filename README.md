@@ -26,7 +26,8 @@ Smart contracts for the LUX and LUM tokens.
 
 - LuxorBondDepository
     - [WFTM-LUX](https://ftmscan.com/address/0x6fB6368e59621eD69639a44C7b39930780cCCE51#code)
-    - [WFTM](https://ftmscan.com/address/0x60509400CFC30f3F468630EfD8bB08D864564D72#code)
+    - [WFTM](https://ftmscan.com/address/0x376969e00621Ebf685fC3D1F216C00d19B162923#code)
+    <!-- - [WFTM](https://ftmscan.com/address/0x60509400CFC30f3F468630EfD8bB08D864564D72#code) -->
     - [DAI-LUX](https://ftmscan.com/address/0x194C771f142751A0368aE9E92dC4eF7E0B5327D5#code)
     - [DAI](https://ftmscan.com/address/0xCf994423b39A6991e82443a8011Bf6749e19434b#code)
     <!-- - [DAI](https://ftmscan.com/address/0x4D30bF2166B2F4eB61913Bdff00d67D8BA0657E1#code) -->
