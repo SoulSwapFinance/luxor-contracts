@@ -934,9 +934,6 @@ contract LuxorBondDepository is Ownable {
             return stakeOrSend( _recipient, _stake, payout );
         }
     }
-
-
-
     
     /* ======== INTERNAL HELPER FUNCTIONS ======== */
 
