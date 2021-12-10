@@ -26,11 +26,18 @@ Smart contracts for the LUX and LUM tokens.
 - [LuxorBondingCalculator.sol](https://ftmscan.com/address/0x6e2bd6d4654226C752A0bC753A3f9Cd6F569B6cB#code)
 - LuxorBondDepository
     - [FTM-LUX](https://ftmscan.com/address/0xaBAD60240f1a39fce0d828eecf54d790FFF92cec#code)
+    - [FTM](https://ftmscan.com/address/0x376969e00621Ebf685fC3D1F216C00d19B162923#code)
+    - [FTM V2](https://ftmscan.com/address/0x13729e99A7b77469f7FD204495a7b49e25e8444a#code)
     - [USDC](https://ftmscan.com/address/0x5351ca511c2348738728b5e71dd76e905becbcb8#code)
-    <!-- - [WFTM](https://ftmscan.com/address/0x376969e00621Ebf685fC3D1F216C00d19B162923#code) -->
+
+
     - [DAI-LUX](https://ftmscan.com/address/0xaC64DC47A1fe52458D3418AC7C568Edc3306130a#code)
+    - [DAI-LUX V2](https://ftmscan.com/address/0x5612d83dfED9B387c925Ac4D19ED3aeDd71004A8#code)
     - [DAI](https://ftmscan.com/address/0xCf994423b39A6991e82443a8011Bf6749e19434b#code)
 
+### Utils
+- [CirculatingLux.sol](https://ftmscan.com/address/0x2c6c178cf5d7Bb86451C3083C278Bc5749BFC325#code)
+- [TreasuryBalance.sol](https://ftmscan.com/address/0xaaBD8eab29B6aC9aed346c967BA331d0c87eB495#code)
 
 ## Miscellaneous
 - Luxor DAO: 0xcB5ba2079C7E9eA6571bb971E383Fe5D59291a95
