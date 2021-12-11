@@ -13,9 +13,8 @@ Smart contracts for the LUX and LUM tokens.
 - [Treasury.sol](https://ftmscan.com/address/0xDF2A28Cc2878422354A93fEb05B41Bd57d71DB24#code)
 - [MultiSigWalletWithDailyLimit.sol](https://ftmscan.com/address/0xFa5Ebc2731ec2292bc4Cdc192d2a5f6F4B312e92#code)
 - [MultiSigWalletWithDailyLimit.sol](https://ftmscan.com/address/0x6E1CdefAcFB1B7468537E6286E4Fc3B6D6235c9c#code)
-- [LuxorZapIn.sol](https://ftmscan.com/address/0x34473F7aCEFF5b258a26eCaB8E7134d2762414ea#code)
+- [LuxorZapIn.sol](https://ftmscan.com/address/0x8CcD03e5EC7427fde1DCE3b2c9C8dc9ab1A035d0#code)
 - [Distributor.sol](https://ftmscan.com/address/0x032f6db264E78885E156F04564344F4c1C59101f#code)
-
 
 ### Staking Contracts
 - [LuxorStaking.sol](https://ftmscan.com/address/0xf3F0BCFd430085e198466cdCA4Db8C2Af47f0802#code)
@@ -29,7 +28,6 @@ Smart contracts for the LUX and LUM tokens.
     - [FTM](https://ftmscan.com/address/0x376969e00621Ebf685fC3D1F216C00d19B162923#code)
     - [FTM V2](https://ftmscan.com/address/0x13729e99A7b77469f7FD204495a7b49e25e8444a#code)
     - [USDC](https://ftmscan.com/address/0x5351ca511c2348738728b5e71dd76e905becbcb8#code)
-
 
     - [DAI-LUX](https://ftmscan.com/address/0xaC64DC47A1fe52458D3418AC7C568Edc3306130a#code)
     - [DAI-LUX V2](https://ftmscan.com/address/0x5612d83dfED9B387c925Ac4D19ED3aeDd71004A8#code)
