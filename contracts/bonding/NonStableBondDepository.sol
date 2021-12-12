@@ -636,7 +636,7 @@ interface AggregatorV3Interface {
     );
 }
 
-contract FtmLpBondDepository is Ownable {
+contract NonStablecoinLpBondDepository is Ownable {
 
     using FixedPoint for *;
     using SafeERC20 for IERC20;
@@ -657,16 +657,17 @@ contract FtmLpBondDepository is Ownable {
 
     /* ======== STATE VARIABLES ======== */
 
-    address public immutable LUX = 0x6671E20b83Ba463F270c8c75dAe57e3Cc246cB2b; // token given as payment for bond
-    address public immutable principle = 0x951BBB838e49F7081072895947735b0892cCcbCD; // token used to create bond
-    address public immutable treasury = 0xDF2A28Cc2878422354A93fEb05B41Bd57d71DB24; // mints LUX when receives principle
+    address public immutable LUX; // token given as payment for bond
+    address public immutable principle; // token used to create bond
+    address public immutable treasury; // mints LUX when receives principle
 
-    address public immutable bondCalculator = 0x6e2bd6d4654226C752A0bC753A3f9Cd6F569B6cB; // calculates value of LP tokens
-    AggregatorV3Interface internal priceFeed = AggregatorV3Interface(0xf4766552D15AE4d256Ad41B6cf2933482B0680dc);
+    address public immutable bondCalculator; // calculates value of LP tokens
 
-    address public staking = 0xf3F0BCFd430085e198466cdCA4Db8C2Af47f0802; // to auto-stake payout
-    address public stakingHelper = 0x49a359BB873E4DfC9B07b3E32ee404c4e8ED14e7; // to stake and claim if no staking warmup
-    bool public useHelper = true;
+    AggregatorV3Interface internal priceFeed;
+
+    address public staking; // to auto-stake payout
+    address public stakingHelper; // to stake and claim if no staking warmup
+    bool public useHelper;
 
     Terms public terms; // stores terms for new bonds
     Adjust public adjustment; // stores adjustment to BCV data
@@ -675,6 +676,8 @@ contract FtmLpBondDepository is Ownable {
 
     uint public totalDebt; // total value of outstanding bonds; used for pricing
     uint public lastDecay; // reference block for debt decay
+
+
 
 
     /* ======== STRUCTS ======== */
@@ -706,7 +709,27 @@ contract FtmLpBondDepository is Ownable {
     }
 
 
+
+
     /* ======== INITIALIZATION ======== */
+
+    constructor (
+        address _LUX,
+        address _principle,
+        address _treasury,
+        address _bondCalculator,
+        address _feed
+    ) {
+        require( _LUX != address(0) );
+        LUX = _LUX;
+        require( _principle != address(0) );
+        principle = _principle;
+        require( _treasury != address(0) );
+        treasury = _treasury;
+        // bondCalculator should be address(0) if not LP bond
+        bondCalculator = _bondCalculator;
+        priceFeed = AggregatorV3Interface( _feed );
+    }
 
     /**
      *  @notice initializes bond parameters
@@ -736,6 +759,8 @@ contract FtmLpBondDepository is Ownable {
         totalDebt = _initialDebt;
         lastDecay = block.number;
     }
+
+
 
 
     /* ======== POLICY FUNCTIONS ======== */
