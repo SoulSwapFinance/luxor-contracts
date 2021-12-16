@@ -1168,7 +1168,7 @@ contract LuxorZap is ZapInBaseV3_1 {
             ISoulSwapPair(
                 SoulSwapFactory.getPair(_ToSoulpoolToken0, _ToSoulpoolToken1)
             );
-        (uint256 res0, uint256 res1, ) = pair.getReserves();
+        (uint256 res0, uint256 res1, ) = pair.erves();
         if (_toContractAddress == _ToSoulpoolToken0) {
             uint256 amountToSwap = calculateSwapInAmount(res0, _amount);
             //if no reserve or a new pair is created

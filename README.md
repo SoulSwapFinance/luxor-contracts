@@ -36,6 +36,7 @@ Smart contracts for the LUX and LUM tokens.
 ### Utils
 - [CirculatingLux.sol](https://ftmscan.com/address/0x2c6c178cf5d7Bb86451C3083C278Bc5749BFC325#code)
 - [TreasuryBalance.sol](https://ftmscan.com/address/0xaaBD8eab29B6aC9aed346c967BA331d0c87eB495#code)
+- [SubsidyRouter.sol](https://ftmscan.com/address/0x4cdE6DdD562Ee4B8c27bafE8817Ae9b83F67BF86#code)
 
 ## Miscellaneous
 - Luxor DAO: 0xcB5ba2079C7E9eA6571bb971E383Fe5D59291a95
@@ -44,3 +45,6 @@ Smart contracts for the LUX and LUM tokens.
 - WFTM/LUX: 0x951BBB838e49F7081072895947735b0892cCcbCD
 - DAI/LUX: 0x46729c2AeeabE7774a0E710867df80a6E19Ef851
 - Feed (LINK): 0xf4766552D15AE4d256Ad41B6cf2933482B0680dc
+
+# Partner Pools
+- [SOUL-FTM](https://ftmscan.com/address/0x742429687DD80ccc02Ff61109f2293b7a08Aa245#code)
