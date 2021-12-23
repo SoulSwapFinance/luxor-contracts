@@ -716,7 +716,7 @@ abstract contract ZapBaseV2_1 is Ownable {
 // ██╔══╝░░██╔══██║██╔═══╝░██╔═══╝░██╔══╝░░██╔══██╗░░░██╔══╝░░██║
 // ███████╗██║░░██║██║░░░░░██║░░░░░███████╗██║░░██║██╗██║░░░░░██║
 // ╚══════╝╚═╝░░╚═╝╚═╝░░░░░╚═╝░░░░░╚══════╝╚═╝░░╚═╝╚═╝╚═╝░░░░░╚═╝
-// Copyright (C) 2021 zapper
+// Copyright (C) 2021 Zapper
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -834,7 +834,7 @@ interface ILuxorBondDepository {
     function deposit( uint _amount, uint _maxPrice, address _depositor) external returns ( uint );
 }
 
-contract LuxorZapIn is ZapInBaseV3_1 {
+contract LuxorZap is ZapInBaseV3_1 {
     using SafeERC20 for IERC20;
 
     mapping (ILuxorBondDepository => address) public allowedPairs;
@@ -858,12 +858,12 @@ contract LuxorZapIn is ZapInBaseV3_1 {
         approvedTargets[0xDEF189DeAEF76E379df891899eb5A00a94cBC250] = true;
 
         //allowedPairs
-        allowedPairs[ILuxorBondDepository(0x6fB6368e59621eD69639a44C7b39930780cCCE51)] = 0x951BBB838e49F7081072895947735b0892cCcbCD; // BondDepository | Principle (FTM-LUX)
-        allowedPairs[ILuxorBondDepository(0x194C771f142751A0368aE9E92dC4eF7E0B5327D5)] = 0x46729c2AeeabE7774a0E710867df80a6E19Ef851; // BondDepository | Principle (DAI-LUX)
+        allowedPairs[ILuxorBondDepository(0xaBAD60240f1a39fce0d828eecf54d790FFF92cec)] = 0x951BBB838e49F7081072895947735b0892cCcbCD; // BondDepository | Principle (FTM-LUX)
+        allowedPairs[ILuxorBondDepository(0x5612d83dfED9B387c925Ac4D19ED3aeDd71004A8)] = 0x46729c2AeeabE7774a0E710867df80a6E19Ef851; // BondDepository | Principle (DAI-LUX)
 
         //allowedReserves
-        allowedReserves[ILuxorBondDepository(0x60509400CFC30f3F468630EfD8bB08D864564D72)] = 0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83; // BondDepository | WFTM
-        allowedReserves[ILuxorBondDepository(0x4D30bF2166B2F4eB61913Bdff00d67D8BA0657E1)] = 0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E; // BondDepository | DAI
+        allowedReserves[ILuxorBondDepository(0x13729e99A7b77469f7FD204495a7b49e25e8444a)] = 0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83; // BondDepository | WFTM
+        allowedReserves[ILuxorBondDepository(0xCf994423b39A6991e82443a8011Bf6749e19434b)] = 0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E; // BondDepository | DAI
     }
 
     event zapIn(
@@ -1168,7 +1168,7 @@ contract LuxorZapIn is ZapInBaseV3_1 {
             ISoulSwapPair(
                 SoulSwapFactory.getPair(_ToSoulpoolToken0, _ToSoulpoolToken1)
             );
-        (uint256 res0, uint256 res1, ) = pair.getReserves();
+        (uint256 res0, uint256 res1, ) = pair.erves();
         if (_toContractAddress == _ToSoulpoolToken0) {
             uint256 amountToSwap = calculateSwapInAmount(res0, _amount);
             //if no reserve or a new pair is created

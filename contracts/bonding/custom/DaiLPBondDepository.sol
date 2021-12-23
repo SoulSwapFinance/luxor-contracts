@@ -833,7 +833,7 @@ contract LuxorLPBondDepository is Ownable {
         uint value = ITreasury( treasury ).valueOf( principle, _amount );
         uint payout = payoutFor( value ); // payout to bonder is computed
 
-        require( payout >= 10000000, "Bond too small" ); // must be > 0.01 LUX ( underflow protection )
+        require( payout >= 10_000_000, "Bond too small" ); // must be > 0.01 LUX ( underflow protection )
         require( payout <= maxPayout(), "Bond too large"); // size protection because there is no slippage
 
         // profits are calculated
@@ -1098,8 +1098,6 @@ contract LuxorLPBondDepository is Ownable {
             pendingPayout_ = payout.mul( percentVested ).div( 10000 );
         }
     }
-
-
 
 
     /* ======= AUXILLIARY ======= */
