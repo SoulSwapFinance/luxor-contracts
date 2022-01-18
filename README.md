@@ -24,6 +24,7 @@ Smart contracts for the LUX and LUM tokens.
 - [LuxorBondingCalculator.sol](https://ftmscan.com/address/0x6e2bd6d4654226C752A0bC753A3f9Cd6F569B6cB#code)
 - [CirculatingLux.sol](https://ftmscan.com/address/0x2c6c178cf5d7Bb86451C3083C278Bc5749BFC325#code)
 - [TreasuryBalance.sol](https://ftmscan.com/address/0xaaBD8eab29B6aC9aed346c967BA331d0c87eB495#code)
+- [LuxorSupply.sol](https://ftmscan.com/address/0xa2f77bD0f02357ABe6b95A00C2D7e30077f87E0b#code)
 <!-- - [SubsidyRouter.sol](https://ftmscan.com/address/0x4cdE6DdD562Ee4B8c27bafE8817Ae9b83F67BF86#code) -->
 
 ## Miscellaneous
