@@ -1,3 +1,5 @@
 {
-    "solidity.compileUsingRemoteVersion": "v0.7.6+commit.7338295f"
+    "solidity.compileUsingRemoteVersion": "v0.7.5+commit.eb77ed08",
+    "solidity.defaultCompiler": "localFile",
+    "solidity.compileUsingLocalVersion": "/Users/buns/Documents/GitHub/SoulSwapFinance/luxor-contracts/soljson-v0.7.5+commit.eb77ed08.js"
 }
