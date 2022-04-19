@@ -71,3 +71,9 @@ Smart contracts for the LUX and LUM tokens.
 
 - [DAI-LUX](https://ftmscan.com/address/0xAE08cf625d4232935D2F1b331517aC0089163DB2#code)
 - [FTM-LUX](https://ftmscan.com/address/0xAbeEd495A87fccc2988F0CdaCf314F23AF52B685#code)
+
+# V2 Contracts
+
+- [StakingManager.sol](https://ftmscan.com/address/0xaAEcd2d753d76A540cAc36E1e1598723560B3c67#code)
+
+- [StakingProxy.sol](https://ftmscan.com/address/0xB316a8780c1aC03979bCD7559AE93fF1CFAADE17#code)
