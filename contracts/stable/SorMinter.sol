@@ -769,23 +769,24 @@ contract SorMinter is Ownable, Withdrawable, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
     using SafeERC20 for ISorToken;
 
-    ISorToken public immutable sor;
-    IERC20 public immutable dai;
-    IERC20 public immutable luxor;
-    ILuxorRouter public immutable luxorRouter;
-    address public treasury;
-    address public strategist;
+    ISorToken public immutable sor = ISorToken(0xeffd4874aca3acd19a24df3281b5cdadd823801a);
+    IERC20 public immutable dai = IERC20(0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e);
+    IERC20 public immutable luxor = IERC20(0x6671e20b83ba463f270c8c75dae57e3cc246cb2b);
+    ILuxorRouter public immutable luxorRouter = ILuxorRouter(0x6b3d631b87fe27af29efec61d2ab8ce4d621ccbf);
+        
+    address public treasury = 0xfd63bf84471bc55dd9a83fdfa293ccbd27e1f4c8;
+    address public strategist = 0xfd63bf84471bc55dd9a83fdfa293ccbd27e1f4c8;
 
     address[] public swapPath;
     address[] public swapPathReverse;
 
-    uint256 public luxorPermille = 200;
-    uint256 public treasuryPermille = 19;
-    uint256 public feePermille = 10;
+    uint256 public luxorPermille = 100;
+    uint256 public treasuryPermille = 50;
+    uint256 public feePermille = 20;
 
-    uint256 public maxStakeAmount;
-    uint256 public maxRedeemAmount;
-    uint256 public maxStakePerSecond;
+    uint256 public maxStakeAmount = 8000000000000000000000;
+    uint256 public maxRedeemAmount = 0;
+    uint256 public maxStakePerSecond = 12000000000000000000000;
     uint256 internal lastSecond;
     uint256 internal lastSecondDaiStaked;
     uint256 internal lastSecondLuxorPermilleChanged;
@@ -804,6 +805,7 @@ contract SorMinter is Ownable, Withdrawable, ReentrancyGuard, Pausable {
     event DaiClaim(address indexed user, uint256 amount);
     event DaiWithdrawn(uint256 amount);
     event LuxorWithdrawn(uint256 amount);
+    event TokenWithdrawn(address tokenAddress, uint256 amount);
     event SwapPathChanged(address[] swapPath);
     event LuxorPermilleChanged(uint256 luxorPermille);
     event TreasuryPermilleChanged(uint256 treasuryPermille);
@@ -815,31 +817,12 @@ contract SorMinter is Ownable, Withdrawable, ReentrancyGuard, Pausable {
     event MaxStakePerSecondChanged(uint256 maxStakePerSecond);
 
     constructor(
-        ISorToken _sor,
-        IERC20 _dai,
-        IERC20 _luxor,
-        ILuxorRouter _luxorRouter,
-        address _treasury,
-        uint256 _maxStakeAmount,
         uint256 _maxRedeemAmount,
         uint256 _maxStakePerSecond
     ) {
-        require(
-            address(_sor) != address(0) &&
-                address(_dai) != address(0) &&
-                address(_luxor) != address(0) &&
-                address(_luxorRouter) != address(0) &&
-                _treasury != address(0),
-            "zero address in constructor"
-        );
-        sor = _sor;
-        dai = _dai;
-        luxor = _luxor;
-        luxorRouter = _luxorRouter;
-        treasury = _treasury;
+
         swapPath = [address(dai), address(luxor)];
         swapPathReverse = [address(luxor), address(dai)];
-        maxStakeAmount = _maxStakeAmount;
         maxRedeemAmount = _maxRedeemAmount;
         maxStakePerSecond = _maxStakePerSecond;
     }
@@ -868,7 +851,7 @@ contract SorMinter is Ownable, Withdrawable, ReentrancyGuard, Pausable {
     }
 
     function setLuxorPermille(uint256 _luxorPermille) external onlyOwner {
-        require(_luxorPermille <= 500, "luxorPermille too high!");
+        require(_luxorPermille <= 750, "luxorPermille too high!"); // 75% MAX LUX BUY
         luxorPermille = _luxorPermille;
         lastSecondLuxorPermilleChanged = block.timestamp;
 
@@ -876,14 +859,14 @@ contract SorMinter is Ownable, Withdrawable, ReentrancyGuard, Pausable {
     }
 
     function setTreasuryPermille(uint256 _treasuryPermille) external onlyOwner {
-        require(_treasuryPermille <= 50, "treasuryPermille too high!");
+        require(_treasuryPermille <= 250, "treasuryPermille too high!"); // 25% MAX
         treasuryPermille = _treasuryPermille;
 
         emit TreasuryPermilleChanged(_treasuryPermille);
     }
 
     function setFeePermille(uint256 _feePermille) external onlyOwner {
-        require(_feePermille <= 20, "feePermille too high!");
+        require(_feePermille <= 100, "feePermille too high!"); // 10% MAX FEE
         feePermille = _feePermille;
 
         emit FeePermilleChanged(_feePermille);
@@ -1087,5 +1070,11 @@ contract SorMinter is Ownable, Withdrawable, ReentrancyGuard, Pausable {
         luxor.safeTransfer(msg.sender, amount);
 
         emit LuxorWithdrawn(amount);
+    }
+    
+    function withdrawToken(address tokenAddress, uint256 amount) external onlyWithdrawer {
+        IERC20(tokenAddress).safeTransfer(msg.sender, amount);
+
+        emit TokenWithdrawn(tokenAddress, amount);
     }
 }
