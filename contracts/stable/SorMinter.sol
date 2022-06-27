@@ -769,13 +769,13 @@ contract SorMinter is Ownable, Withdrawable, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
     using SafeERC20 for ISorToken;
 
-    ISorToken public immutable sor = ISorToken(0xeffd4874aca3acd19a24df3281b5cdadd823801a);
-    IERC20 public immutable dai = IERC20(0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e);
-    IERC20 public immutable luxor = IERC20(0x6671e20b83ba463f270c8c75dae57e3cc246cb2b);
-    ILuxorRouter public immutable luxorRouter = ILuxorRouter(0x6b3d631b87fe27af29efec61d2ab8ce4d621ccbf);
-        
-    address public treasury = 0xfd63bf84471bc55dd9a83fdfa293ccbd27e1f4c8;
-    address public strategist = 0xfd63bf84471bc55dd9a83fdfa293ccbd27e1f4c8;
+    ISorToken public immutable sor = ISorToken(0xEFFd4874AcA3Acd19a24dF3281b5cdAdD823801A);
+    IERC20 public immutable dai = IERC20(0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E);
+    IERC20 public immutable luxor = IERC20(0x6671E20b83Ba463F270c8c75dAe57e3Cc246cB2b);
+    ILuxorRouter public immutable luxorRouter = ILuxorRouter(0x6b3d631B87FE27aF29efeC61d2ab8CE4d621cCBF);
+
+    address public treasury = 0xFd63Bf84471Bc55DD9A83fdFA293CCBD27e1F4C8;
+    address public strategist = 0xFd63Bf84471Bc55DD9A83fdFA293CCBD27e1F4C8;
 
     address[] public swapPath;
     address[] public swapPathReverse;
@@ -816,15 +816,9 @@ contract SorMinter is Ownable, Withdrawable, ReentrancyGuard, Pausable {
     event MaxRedeemAmountChanged(uint256 maxRedeemAmount);
     event MaxStakePerSecondChanged(uint256 maxStakePerSecond);
 
-    constructor(
-        uint256 _maxRedeemAmount,
-        uint256 _maxStakePerSecond
-    ) {
-
+    constructor() {
         swapPath = [address(dai), address(luxor)];
         swapPathReverse = [address(luxor), address(dai)];
-        maxRedeemAmount = _maxRedeemAmount;
-        maxStakePerSecond = _maxStakePerSecond;
     }
 
     function pause() external onlyOwner {

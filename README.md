@@ -51,9 +51,11 @@ Smart contracts for the LUX and LUM tokens.
 
 ### 7-Day Bonds
 - [DAI](https://ftmscan.com/address/0x80C61168e1F02e1835b541e9Ca6Bb3416a36Af6F#code)
+
 - [FTM](https://ftmscan.com/address/0x376969e00621Ebf685fC3D1F216C00d19B162923#code)
 
 - [DAI-LUX](https://ftmscan.com/address/0x5612d83dfED9B387c925Ac4D19ED3aeDd71004A8#code)
+
 - [FTM-LUX](https://ftmscan.com/address/0xaBAD60240f1a39fce0d828eecf54d790FFF92cec#code)
 
 
@@ -74,6 +76,20 @@ Smart contracts for the LUX and LUM tokens.
 
 # V2 Contracts
 
+- [SOR.sol](https://ftmscan.com/address/0xEFFd4874AcA3Acd19a24dF3281b5cdAdD823801A#code)
+ 
+- [LUX-SOR 5D](https://ftmscan.com/address/0xF584E92F891e2BCF78Eb7B49D929eae48c2d8B6A#code)
+
+- [LUX-SOR 10D](https://ftmscan.com/address/0xf9a0fA495e0CfaFE40CAb1bDC307f6Fc24889d51#code)
+
+- [FTM Bond](https://ftmscan.com/address/0x2b4ecB35Aa2a5C163675E1b66577E127C38eb911#code)
+
+- [SOR Bond](https://ftmscan.com/address/0x4Ac427a4DFF61023c2e84d8316180CF109c5e45C#code)
+
+- [SOR 10D](https://ftmscan.com/address/#code)
+
 - [StakingManager.sol](https://ftmscan.com/address/0xaAEcd2d753d76A540cAc36E1e1598723560B3c67#code)
+
+- [SorMinter.sol](https://ftmscan.com/address/0x104b191008e56a0B79f25a828Ee18873AdD36C6c#code)
 
 - [StakingProxy.sol](https://ftmscan.com/address/0xB316a8780c1aC03979bCD7559AE93fF1CFAADE17#code)
