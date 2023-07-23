@@ -1,8 +1,4 @@
-/**
- *Submitted for verification at FtmScan.com on 2022-04-20
-*/
-
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity =0.7.5;
 
 interface IOwnable {
@@ -75,17 +71,6 @@ library SafeMath {
         return c;
     }
 
-    function sub32(uint32 a, uint32 b) internal pure returns (uint32) {
-        return sub32(a, b, "SafeMath: subtraction overflow");
-    }
-
-    function sub32(uint32 a, uint32 b, string memory errorMessage) internal pure returns (uint32) {
-        require(b <= a, errorMessage);
-        uint32 c = a - b;
-
-        return c;
-    }
-
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a == 0) {
             return 0;
@@ -152,11 +137,7 @@ library Address {
       return functionCall(target, data, "Address: low-level call failed");
     }
 
-    function functionCall(
-        address target, 
-        bytes memory data, 
-        string memory errorMessage
-    ) internal returns (bytes memory) {
+    function functionCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
         return _functionCallWithValue(target, data, 0, errorMessage);
     }
 
@@ -164,12 +145,7 @@ library Address {
         return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
     }
 
-    function functionCallWithValue(
-        address target, 
-        bytes memory data, 
-        uint256 value, 
-        string memory errorMessage
-    ) internal returns (bytes memory) {
+    function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage) internal returns (bytes memory) {
         require(address(this).balance >= value, "Address: insufficient balance for call");
         require(isContract(target), "Address: call to non-contract");
 
@@ -178,12 +154,7 @@ library Address {
         return _verifyCallResult(success, returndata, errorMessage);
     }
 
-    function _functionCallWithValue(
-        address target, 
-        bytes memory data, 
-        uint256 weiValue, 
-        string memory errorMessage
-    ) private returns (bytes memory) {
+    function _functionCallWithValue(address target, bytes memory data, uint256 weiValue, string memory errorMessage) private returns (bytes memory) {
         require(isContract(target), "Address: call to non-contract");
 
         // solhint-disable-next-line avoid-low-level-calls
@@ -210,11 +181,7 @@ library Address {
         return functionStaticCall(target, data, "Address: low-level static call failed");
     }
 
-    function functionStaticCall(
-        address target, 
-        bytes memory data, 
-        string memory errorMessage
-    ) internal view returns (bytes memory) {
+    function functionStaticCall(address target, bytes memory data, string memory errorMessage) internal view returns (bytes memory) {
         require(isContract(target), "Address: static call to non-contract");
 
         // solhint-disable-next-line avoid-low-level-calls
@@ -226,11 +193,7 @@ library Address {
         return functionDelegateCall(target, data, "Address: low-level delegate call failed");
     }
 
-    function functionDelegateCall(
-        address target, 
-        bytes memory data, 
-        string memory errorMessage
-    ) internal returns (bytes memory) {
+    function functionDelegateCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
         require(isContract(target), "Address: delegate call to non-contract");
 
         // solhint-disable-next-line avoid-low-level-calls
@@ -238,11 +201,7 @@ library Address {
         return _verifyCallResult(success, returndata, errorMessage);
     }
 
-    function _verifyCallResult(
-        bool success, 
-        bytes memory returndata, 
-        string memory errorMessage
-    ) private pure returns(bytes memory) {
+    function _verifyCallResult(bool success, bytes memory returndata, string memory errorMessage) private pure returns(bytes memory) {
         if (success) {
             return returndata;
         } else {
@@ -357,8 +316,7 @@ abstract contract ERC20 is IERC20 {
 
     function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
         _transfer(sender, recipient, amount);
-        _approve(sender, msg.sender, _allowances[sender][msg.sender]
-            .sub(amount, "ERC20: transfer amount exceeds allowance"));
+        _approve(sender, msg.sender, _allowances[sender][msg.sender].sub(amount, "ERC20: transfer amount exceeds allowance"));
         return true;
     }
 
@@ -368,8 +326,7 @@ abstract contract ERC20 is IERC20 {
     }
 
     function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
-        _approve(msg.sender, spender, _allowances[msg.sender][spender]
-            .sub(subtractedValue, "ERC20: decreased allowance below zero"));
+        _approve(msg.sender, spender, _allowances[msg.sender][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
         return true;
     }
 
@@ -530,8 +487,7 @@ library SafeERC20 {
     }
 
     function safeDecreaseAllowance(IERC20 token, address spender, uint256 value) internal {
-        uint256 newAllowance = token.allowance(address(this), spender)
-            .sub(value, "SafeERC20: decreased allowance below zero");
+        uint256 newAllowance = token.allowance(address(this), spender).sub(value, "SafeERC20: decreased allowance below zero");
         _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
@@ -628,106 +584,85 @@ library FixedPoint {
     }
 }
 
-interface AggregatorV3Interface {
-
-  function decimals() external view returns (uint8);
-  function description() external view returns (string memory);
-  function version() external view returns (uint256);
-
-  // getRoundData and latestRoundData should both raise "No data present"
-  // if they do not have data to report, instead of returning unset values
-  // which could be misinterpreted as actual reported values.
-  function getRoundData(uint80 _roundId)
-    external
-    view
-    returns (
-      uint80 roundId,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    );
-  function latestRoundData()
-    external
-    view
-    returns (
-      uint80 roundId,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    );
-}
-
 interface ITreasury {
-    function deposit( uint _amount, address _token, uint _profit ) external returns ( bool );
+    function deposit( uint _amount, address _token, uint _profit ) external returns ( uint send_ );
     function valueOf( address _token, uint _amount ) external view returns ( uint value_ );
-    function mintRewards( address _recipient, uint _amount ) external;
 }
 
-interface IStaking {
+interface IBondCalculator {
+    function valuation( address _LP, uint _amount ) external view returns ( uint );
+    function markdown( address _LP ) external view returns ( uint );
+}
+
+interface IStakingManager {
     function stake( uint _amount, address _recipient ) external returns ( bool );
+    function claim( address _recipient ) external;
 }
 
-interface IStakingHelper {
-    function stake( uint _amount, address _recipient ) external;
+interface ILUM {
+    function gonsForBalance( uint amount ) external view returns ( uint );
+    function balanceForGons( uint gons ) external view returns ( uint );
 }
 
-interface IWETH9 is IERC20 {
-    /// @notice Deposit ether to get wrapped ether
-    function deposit() external payable;
-}
-
-contract FtmBondDepository is Ownable {
+contract LuxSorBond is Ownable {
 
     using FixedPoint for *;
     using SafeERC20 for IERC20;
     using SafeMath for uint;
-    using SafeMath for uint32;
 
     /* ======== EVENTS ======== */
+
     event BondCreated( uint deposit, uint indexed payout, uint indexed expires, uint indexed priceInUSD );
     event BondRedeemed( address indexed recipient, uint payout, uint remaining );
     event BondPriceChanged( uint indexed priceInUSD, uint indexed internalPrice, uint indexed debtRatio );
     event ControlVariableAdjustment( uint initialBCV, uint newBCV, uint adjustment, bool addition );
 
     /* ======== STATE VARIABLES ======== */
-    address public immutable LUX = 0x6671E20b83Ba463F270c8c75dAe57e3Cc246cB2b; // token given as payment for bond
-    address public immutable principle = 0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83; // token used to create bond
-    address public immutable treasury = 0xDF2A28Cc2878422354A93fEb05B41Bd57d71DB24; // mints LUX when receives principle
-    address public immutable DAO = 0xcB5ba2079C7E9eA6571bb971E383Fe5D59291a95; // receives profit share from bond
 
-    AggregatorV3Interface internal priceFeed = AggregatorV3Interface(0xf4766552D15AE4d256Ad41B6cf2933482B0680dc);
+    address public immutable LUX = 0x6671E20b83Ba463F270c8c75dAe57e3Cc246cB2b; // reward token from treasury
+    address public immutable LUM = 0x4290b33158F429F40C0eDc8f9b9e5d8C5288800c; // given as payment for bond
+    address public immutable principle = 0x622E69B6785311800B0d55D72fF27D91F5518212; // token used to create bond // LUX_SOR
+    address public treasury = 0xDF2A28Cc2878422354A93fEb05B41Bd57d71DB24; // mints LUX when receives principle
+    address public DAO = 0xcB5ba2079C7E9eA6571bb971E383Fe5D59291a95; // receives profit share from bond
 
-    address public staking = 0xf3F0BCFd430085e198466cdCA4Db8C2Af47f0802; // to auto-stake payout
-    address public stakingHelper = 0x49a359BB873E4DfC9B07b3E32ee404c4e8ED14e7; // to stake and claim if no staking warmup
-    bool public useHelper = true;
+    bool public immutable isLiquidityBond = true; // LP and Reserve bonds are treated slightly different
+    address public bondCalculator = 0x6e2bd6d4654226C752A0bC753A3f9Cd6F569B6cB; // calculates value of LP tokens
+
+    address public stakingManager; // to stake and claim
 
     Terms public terms; // stores terms for new bonds
     Adjust public adjustment; // stores adjustment to BCV data
 
-    mapping( address => Bond ) public bondInfo; // stores bond information for depositors
+    mapping( address => Bond ) public _bondInfo; // stores bond information for depositors
 
     uint public totalDebt; // total value of outstanding bonds; used for pricing
-    uint32 public lastDecay; // reference block for debt decay
+    uint public lastDecay; // reference block for debt decay
+    
+    uint public totalPrinciple; // total principle bonded through this depository
+
+    string internal name_ = 'LuxSor'; // name of this bond
+    uint8 public principleDecimals = 18; // principle decimals or pair markdown decimals
+    uint8 public premium = 20; // percent: 20% = 20
 
     /* ======== STRUCTS ======== */
 
     // Info for creating new bonds
     struct Terms {
         uint controlVariable; // scaling variable for price
-        uint minimumPrice; // vs principle value. 4 decimals (1500 = 0.15)
+        uint minimumPrice; // vs principle value , 4 decimals 0.15 = 1500
         uint maxPayout; // in thousandths of a %. i.e. 500 = 0.5%
+        uint fee; // as % of bond payout, in hundreths. ( 500 = 5% = 0.05 for every 1 paid)
         uint maxDebt; // 9 decimal debt ratio, max % total supply created as debt
-        uint32 vestingTerm; // in seconds
+        uint vestingTerm; // in blocks
     }
 
-    // Info for bond holder
+    // Info for bond holder with gons
     struct Bond {
-        uint payout; // LUX remaining to be paid
-        uint pricePaid; // In DAI, for front end viewing
-        uint32 vesting; // Seconds left to vest
-        uint32 lastTime; // Last interaction
+        uint payout; // LUX amount at the moment of bond
+        uint pricePaid; // In SOR, for front-end viewing
+        uint lastTime; // Last interaction
+        uint vesting; // Blocks left to vest
+        uint gonsPayout; // LUM gons remaining to be paid
     }
 
     // Info for incremental adjustments to control variable 
@@ -735,8 +670,8 @@ contract FtmBondDepository is Ownable {
         bool add; // addition or subtraction
         uint rate; // increment
         uint target; // BCV when adjustment finished
-        uint32 buffer; // minimum length (in seconds) between adjustments
-        uint32 lastTime; // block when last adjustment made
+        uint buffer; // minimum length (in blocks) between adjustments
+        uint lastTime; // time when last adjustment made
     }
 
     /* ======== INITIALIZATION ======== */
@@ -747,68 +682,47 @@ contract FtmBondDepository is Ownable {
      *  @param _vestingTerm uint
      *  @param _minimumPrice uint
      *  @param _maxPayout uint
+     *  @param _fee uint
      *  @param _maxDebt uint
      *  @param _initialDebt uint
      */
     function initializeBondTerms( 
         uint _controlVariable, 
+        uint _vestingTerm,
         uint _minimumPrice,
         uint _maxPayout,
+        uint _fee,
         uint _maxDebt,
-        uint _initialDebt,
-        uint32 _vestingTerm
+        uint _initialDebt
     ) external onlyPolicy() {
-        // require( currentDebt() == 0, "Debt must be 0 for initialization" );
         terms = Terms ({
             controlVariable: _controlVariable,
             vestingTerm: _vestingTerm,
             minimumPrice: _minimumPrice,
             maxPayout: _maxPayout,
+            fee: _fee,
             maxDebt: _maxDebt
         });
         totalDebt = _initialDebt;
-        lastDecay = uint32(block.timestamp);
+        lastDecay = block.timestamp;
     }
 
     function initialize() external onlyPolicy() {
             terms = Terms ({
             controlVariable: 100,
-            vestingTerm: 432_000,
-            minimumPrice: 10_000,
-            maxPayout: 333, 
-            maxDebt: 100_000
+            vestingTerm: 432_000, // 5 DAYS
+            minimumPrice: 0,
+            maxPayout: 400,
+            fee: 10_000,
+            maxDebt: 10_000_000_000_000
         });
-        totalDebt = 0;
-        lastDecay = uint32(block.timestamp);
+        totalDebt == 0 ? 0 : totalDebt;
+        lastDecay = block.timestamp;
     }
 
-    // VIEWS //
-
-    function viewVestingTerm() public view returns (uint vestingTerm) {
-        return terms.vestingTerm;
-    }
-    function viewVestingHours() public view returns (uint vestingHours) {
-        return terms.vestingTerm / 3_600;
-    }
-    function viewVestingDays() public view returns (uint vestingDays) {
-        return terms.vestingTerm / 86_400;
-    }
-    function viewPayoutPercent() public view returns (uint payoutPercent) {
-        return terms.maxPayout / 1_000;
-    }
-    function viewFee() public pure returns (uint fee) {
-        return 0;
-    }
-    function viewMaxDebt() public view returns (uint maxDebt) {
-        return terms.maxDebt;
-    }
-    function viewMinPrice() public view returns (uint minPrice) {
-        return terms.minimumPrice;
-    }
-    
     /* ======== POLICY FUNCTIONS ======== */
 
-    enum PARAMETER { VESTING, PAYOUT, DEBT, MINPRICE }
+    enum PARAMETER { VESTING, PAYOUT, FEE, DEBT, MINPRICE }
     /**
      *  @notice set parameters for new bonds
      *  @param _parameter PARAMETER
@@ -816,50 +730,33 @@ contract FtmBondDepository is Ownable {
      */
     function setBondTerms ( PARAMETER _parameter, uint _input ) external onlyPolicy() {
         if ( _parameter == PARAMETER.VESTING ) { // 0
-            require( _input >= 129600, "Vesting must be longer than 36 hours" );
-            terms.vestingTerm = uint32(_input);
+            require( _input >= 10_000, "Vesting must be longer than 3 hours" );
+            terms.vestingTerm = _input;
         } else if ( _parameter == PARAMETER.PAYOUT ) { // 1
             require( _input <= 1_000, "Payout cannot be above 1 percent" );
             terms.maxPayout = _input;
-        } else if ( _parameter == PARAMETER.DEBT ) { // 2
+        } else if ( _parameter == PARAMETER.FEE ) { // 2
+            require( _input <= 10_000, "DAO fee cannot exceed payout" );
+            terms.fee = _input;
+        } else if ( _parameter == PARAMETER.DEBT ) { // 3
             terms.maxDebt = _input;
-        } else if ( _parameter == PARAMETER.MINPRICE ) { // 3
+        } else if ( _parameter == PARAMETER.MINPRICE ) { // 4
             terms.minimumPrice = _input;
         }
     }
 
-    /**
-     *  @notice set control variable adjustment
-     *  @param _addition bool
-     *  @param _increment uint
-     *  @param _target uint
-     *  @param _buffer uint
-     */
-    function setAdjustment ( 
-        bool _addition,
-        uint _increment, 
-        uint _target,
-        uint32 _buffer 
-    ) external onlyPolicy() {
-        require( _increment <= terms.controlVariable.mul( 25 ).div( 1000 ), "Increment too large" );
-
-        adjustment = Adjust({
-            add: _addition,
-            rate: _increment,
-            target: _target,
-            buffer: _buffer,
-            lastTime: uint32(block.timestamp)
-        });
-    }
-
-    function setVestingTerm(uint term) external onlyPolicy() {
-        require( uint32(term) >= 129600, "vesting must last at least 36 hours" );
-        terms.vestingTerm = uint32(term) * 3_600; // 60s * 60m = 3_600s
+    function setVestingHours(uint _hours) external onlyPolicy() {
+            require( _hours >= 3, "vesting must last at least 3 hours" );
+            terms.vestingTerm = _hours * 3_600; // 60s * 60m = 3_600s
     }
 
     function setPayoutPercent(uint _percent) external onlyPolicy() {
-        require( _percent <= 1_000, "Payout cannot be above 1 percent" );
-        terms.maxPayout = _percent; // 1K = 1%
+            terms.maxPayout = _percent * 1_000; // 1K = 1%
+    }
+
+    function setFee(uint _fee) external onlyPolicy() {
+            require( _fee <= 10_000, "fee cannot exceed payout (divisor: 10K)" );
+            terms.fee = _fee;
     }
 
     function setMaxDebt(uint _maxDebt) external onlyPolicy() {
@@ -870,20 +767,56 @@ contract FtmBondDepository is Ownable {
             terms.minimumPrice = _minPrice;
     }
 
+    // VIEWS //
+
+    function viewVestingHours() public view returns (uint vestingHours) {
+        return terms.vestingTerm / 3_600;
+    }
+    function viewVestingDays() public view returns (uint vestingDays) {
+        return terms.vestingTerm / 86_400;
+    }
+    function viewPayoutPercent() public view returns (uint payoutPercent) {
+        return terms.maxPayout / 1_000;
+    }
+    function viewFee() public view returns (uint fee) {
+        return terms.fee;
+    }
+    function viewMaxDebt() public view returns (uint maxDebt) {
+        return terms.maxDebt;
+    }
+    function viewMinPrice() public view returns (uint minPrice) {
+        return terms.minimumPrice;
+    }
+
+    /**
+     *  @notice set control variable adjustment
+     *  @param _addition bool
+     *  @param _increment uint
+     *  @param _target uint
+     *  @param _buffer uint
+     */
+    function setAdjustment (
+        bool _addition,
+        uint _increment, 
+        uint _target,
+        uint _buffer 
+    ) external onlyPolicy() {
+        adjustment = Adjust({
+            add: _addition,
+            rate: _increment,
+            target: _target,
+            buffer: _buffer,
+            lastTime: uint32(block.timestamp)
+        });
+    }
+    
     /**
      *  @notice set contract for auto stake
-     *  @param _staking address
-     *  @param _helper bool
+     *  @param _manager address
      */
-    function setStaking( address _staking, bool _helper ) external onlyPolicy() {
-        require( _staking != address(0) );
-        if ( _helper ) {
-            useHelper = true;
-            stakingHelper = _staking;
-        } else {
-            useHelper = false;
-            staking = _staking;
-        }
+    function setStakingManager( address _manager) external onlyPolicy() {
+        require( _manager != address(0) );
+        stakingManager = _manager;
     }
 
     /* ======== USER FUNCTIONS ======== */
@@ -899,43 +832,58 @@ contract FtmBondDepository is Ownable {
         uint _amount, 
         uint _maxPrice,
         address _depositor
-    ) external payable returns ( uint ) {
+    ) external returns ( uint ) {
         require( _depositor != address(0), "Invalid address" );
 
         decayDebt();
         require( totalDebt <= terms.maxDebt, "Max capacity reached" );
         
-        uint priceInUSD = bondPriceInUSD(); // Stored in bond info
-        uint nativePrice = _bondPrice();
+        uint priceInUSD = bondPriceInUSD(); 
+        // Stored in bond info
+        // uint nativePrice = _bondPrice();
 
-        require( _maxPrice >= nativePrice, "Slippage limit: more than max price" ); // slippage protection
+        require( _maxPrice >= _bondPrice(), "Slippage limit: more than max price" ); // slippage protection
 
         uint value = ITreasury( treasury ).valueOf( principle, _amount );
         uint payout = payoutFor( value ); // payout to bonder is computed
 
-        require( payout >= 10000000, "Bond too small" ); // must be > 0.01 LUX ( underflow protection )
+        require( payout >= 10_000_000, "Bond too small" ); // must be > 0.01 LUX ( underflow protection )
         require( payout <= maxPayout(), "Bond too large"); // size protection because there is no slippage
 
+        // profits are calculated
+        uint fee = payout.mul( terms.fee ).div( 10_000 );
+        uint profit = value.sub( payout ).sub( fee );
+
         /**
-            asset carries risk and is not minted against
-            asset transfered to treasury and rewards minted as payout
-         */
-        if (address(this).balance >= _amount) {
-            // pay with WETH9
-            IWETH9(principle).deposit{value: _amount}(); // wrap only what is needed to pay
-            IWETH9(principle).transfer(treasury, _amount);
-        } else {
-            IERC20( principle ).safeTransferFrom( msg.sender, treasury, _amount );
-        }
+            principle is transferred in approved 
+            and deposited into the treasury, 
+            returning (_amount - profit) LUX
+        */
+        IERC20( principle ).safeTransferFrom( msg.sender, address(this), _amount );
+        IERC20( principle ).approve( address( treasury ), _amount );
+        ITreasury( treasury ).deposit( _amount, principle, profit );
         
-        ITreasury( treasury ).mintRewards( address(this), payout );
+        totalPrinciple = totalPrinciple.add(_amount);
+        
+        if ( fee != 0 ) { // fee is transferred to dao 
+            IERC20( LUX ).safeTransfer( DAO, fee ); 
+        }
         
         // total debt is increased
         totalDebt = totalDebt.add( value ); 
-                
+        // uint stakeAmount = totalBond.sub(fee);
+        
+        IERC20( LUX ).approve( stakingManager, payout );
+
+        IStakingManager(stakingManager).stake( payout, address(this) );
+        /* ---------------------------------------------------------- */
+        
+        uint stakeGons=ILUM(LUM).gonsForBalance(payout);
+
         // depositor info is stored
-        bondInfo[ _depositor ] = Bond({ 
-            payout: bondInfo[ _depositor ].payout.add( payout ),
+        _bondInfo[ _depositor ] = Bond({ 
+            gonsPayout: _bondInfo[ _depositor ].gonsPayout.add( stakeGons ),
+            payout: _bondInfo[ _depositor ].payout.add( payout ),
             vesting: terms.vestingTerm,
             lastTime: uint32(block.timestamp),
             pricePaid: priceInUSD
@@ -946,71 +894,39 @@ contract FtmBondDepository is Ownable {
         emit BondPriceChanged( bondPriceInUSD(), _bondPrice(), debtRatio() );
 
         adjust(); // control variable is adjusted
-        refundETH(); //refund user if needed
         return payout; 
     }
 
     /** 
-     *  @notice redeem bond for user
+     *  @notice redeem bond for user, keep the parameter bool _stake for compatibility of redeem helper
      *  @param _recipient address
      *  @param _stake bool
      *  @return uint
      */ 
-    function redeem( address _recipient, bool _stake ) external returns ( uint ) {        
-        Bond memory info = bondInfo[ _recipient ];
+    function redeem( address _recipient, bool _stake) external returns ( uint ) {        
+        _stake; // silence
+        Bond memory info = _bondInfo[ _recipient ];
         uint percentVested = percentVestedFor( _recipient ); // (blocks since last interaction / vesting term remaining)
 
-        if ( percentVested >= 10000 ) { // if fully vested
-            delete bondInfo[ _recipient ]; // delete user info
-            emit BondRedeemed( _recipient, info.payout, 0 ); // emit bond data
-            return stakeOrSend( _recipient, _stake, info.payout ); // pay user everything due
+        require ( percentVested >= 10_000 , "not yet fully vested" ) ; // if fully vested
 
-        } else { // if unfinished
-            // calculate payout vested
-            uint payout = info.payout.mul( percentVested ).div( 10000 );
-
-            // store updated deposit info
-            bondInfo[ _recipient ] = Bond({
-                payout: info.payout.sub( payout ),
-                vesting: info.vesting.sub32( uint32( block.timestamp ).sub32( info.lastTime ) ),
-                lastTime: uint32( block.timestamp ),
-                pricePaid: info.pricePaid
-            });
-
-            emit BondRedeemed( _recipient, payout, bondInfo[ _recipient ].payout );
-            return stakeOrSend( _recipient, _stake, payout );
-        }
+        IStakingManager(stakingManager).claim( address(this) );
+                
+        delete _bondInfo[ _recipient ]; // delete user info
+        uint _amount = ILUM(LUM).balanceForGons(info.gonsPayout);
+        emit BondRedeemed( _recipient, _amount, 0 ); // emit bond data
+        IERC20( LUM ).transfer( _recipient, _amount ); // pay user everything due
+        return _amount;
     }
     
     /* ======== INTERNAL HELPER FUNCTIONS ======== */
 
     /**
-     *  @notice allow user to stake payout automatically
-     *  @param _stake bool
-     *  @param _amount uint
-     *  @return uint
-     */
-    function stakeOrSend( address _recipient, bool _stake, uint _amount ) internal returns ( uint ) {
-        if ( !_stake ) { // if user does not want to stake
-            IERC20( LUX ).transfer( _recipient, _amount ); // send payout
-        } else { // if user wants to stake
-            if ( useHelper ) { // use if staking warmup is 0
-                IERC20( LUX ).approve( stakingHelper, _amount );
-                IStakingHelper( stakingHelper ).stake( _amount, _recipient );
-            } else {
-                IERC20( LUX ).approve( staking, _amount );
-                IStaking( staking ).stake( _amount, _recipient );
-            }
-        }
-        return _amount;
-    }
-
-    /**
      *  @notice makes incremental adjustment to control variable
      */
     function adjust() internal {
-         uint timeCanAdjust = adjustment.lastTime.add( adjustment.buffer );
-         if( adjustment.rate != 0 && block.timestamp >= timeCanAdjust ) {
+        uint blockCanAdjust = adjustment.lastTime.add( adjustment.buffer );
+        if( adjustment.rate != 0 && block.timestamp >= blockCanAdjust ) {
             uint initial = terms.controlVariable;
             if ( adjustment.add ) {
                 terms.controlVariable = terms.controlVariable.add( adjustment.rate );
@@ -1033,7 +949,31 @@ contract FtmBondDepository is Ownable {
      */
     function decayDebt() internal {
         totalDebt = totalDebt.sub( debtDecay() );
-        lastDecay = uint32(block.timestamp);
+        lastDecay = block.timestamp;
+    }
+
+    function setTreasury(address _treasury) external onlyPolicy() {
+        require( _treasury != address(0) );
+        treasury = _treasury;
+    }
+    
+    function setDAO(address _DAO) external onlyPolicy() {
+        require( _DAO != address(0) );
+        DAO = _DAO;
+    }
+    
+    function setBondingCalculator(address _calculator) external onlyPolicy() {
+        require( _calculator != address(0) );
+        bondCalculator = _calculator;
+    }
+
+    function setPrincipleDecimals(uint8 _principleDecimals) external onlyPolicy() {
+        require(_principleDecimals != 0);
+        principleDecimals = _principleDecimals;
+    }
+
+    function setPremium(uint8 _premium) external onlyPolicy() {
+        premium = _premium;
     }
 
     /* ======== VIEW FUNCTIONS ======== */
@@ -1055,13 +995,12 @@ contract FtmBondDepository is Ownable {
         return FixedPoint.fraction( _value, bondPrice() ).decode112with18().div( 1e14 );
     }
 
-
     /**
      *  @notice calculate current bond premium
      *  @return price_ uint
      */
     function bondPrice() public view returns ( uint price_ ) {        
-        price_ = terms.controlVariable.mul( debtRatio() ).div( 1e5 );
+        price_ = terms.controlVariable.mul( debtRatio() ).add( 1000000000 ).div( 1e7 );
         if ( price_ < terms.minimumPrice ) {
             price_ = terms.minimumPrice;
         }
@@ -1072,7 +1011,7 @@ contract FtmBondDepository is Ownable {
      *  @return price_ uint
      */
     function _bondPrice() internal returns ( uint price_ ) {
-        price_ = terms.controlVariable.mul( debtRatio() ).div( 1e5 );
+        price_ = terms.controlVariable.mul( debtRatio() ).add( 1000000000 ).div( 1e7 );
         if ( price_ < terms.minimumPrice ) {
             price_ = terms.minimumPrice;        
         } else if ( terms.minimumPrice != 0 ) {
@@ -1081,21 +1020,28 @@ contract FtmBondDepository is Ownable {
     }
 
     /**
-     *  @notice get asset price from chainlink
-     */
-    function assetPrice() public view returns (int) {
-        ( , int price, , , ) = priceFeed.latestRoundData();
-        return price;
-    }
-
-    /**
      *  @notice converts bond price to DAI value
      *  @return price_ uint
      */
     function bondPriceInUSD() public view returns ( uint price_ ) {
-        price_ = bondPrice().mul( uint( assetPrice() ) ).mul( 1e6 );
+            price_ = bondPrice().mul( IBondCalculator( bondCalculator ).markdown( principle ) ).div( 100 );
     }
-
+    
+    /**
+     *  @notice return bond info with latest LUM balance calculated from gons
+     *  @param _depositor address
+     *  @return payout uint
+     *  @return vesting uint
+     *  @return lastTime uint
+     *  @return pricePaid uint
+     */
+    function bondInfo(address _depositor) public view returns ( uint payout, uint vesting, uint lastTime, uint pricePaid ) {
+        Bond memory info = _bondInfo[ _depositor ];
+        payout = ILUM(LUM).balanceForGons(info.gonsPayout);
+        vesting = (info).vesting;
+        lastTime = info.lastTime;
+        pricePaid = info.pricePaid;
+    }
 
     /**
      *  @notice calculate current ratio of debt to LUX supply
@@ -1110,11 +1056,15 @@ contract FtmBondDepository is Ownable {
     }
 
     /**
-     *  @notice debt ratio in same terms as reserve bonds
+     *  @notice debt ratio in same terms for reserve or liquidity bonds
      *  @return uint
      */
     function standardizedDebtRatio() external view returns ( uint ) {
-        return debtRatio().mul( uint( assetPrice() ) ).div( 1e8 ); // ETH feed is 8 decimals
+        if ( isLiquidityBond ) {
+            return debtRatio().mul( IBondCalculator( bondCalculator ).markdown( principle ) ).div( 1e9 );
+        } else {
+            return debtRatio();
+        }
     }
 
     /**
@@ -1130,8 +1080,8 @@ contract FtmBondDepository is Ownable {
      *  @return decay_ uint
      */
     function debtDecay() public view returns ( uint decay_ ) {
-        uint32 timeSinceLast = uint32(block.timestamp).sub32( lastDecay );
-        decay_ = totalDebt.mul( timeSinceLast ).div( terms.vestingTerm );
+        uint blocksSinceLast = block.timestamp.sub( lastDecay );
+        decay_ = totalDebt.mul( blocksSinceLast ).div( terms.vestingTerm );
         if ( decay_ > totalDebt ) {
             decay_ = totalDebt;
         }
@@ -1144,12 +1094,12 @@ contract FtmBondDepository is Ownable {
      *  @return percentVested_ uint
      */
     function percentVestedFor( address _depositor ) public view returns ( uint percentVested_ ) {
-        Bond memory bond = bondInfo[ _depositor ];
-        uint secondsSinceLast = uint32(block.timestamp).sub( bond.lastTime );
+        Bond memory bond = _bondInfo[ _depositor ];
+        uint blocksSinceLast = block.timestamp.sub( bond.lastTime );
         uint vesting = bond.vesting;
 
         if ( vesting > 0 ) {
-            percentVested_ = secondsSinceLast.mul( 10000 ).div( vesting );
+            percentVested_ = blocksSinceLast.mul( 10_000 ).div( vesting );
         } else {
             percentVested_ = 0;
         }
@@ -1162,37 +1112,35 @@ contract FtmBondDepository is Ownable {
      */
     function pendingPayoutFor( address _depositor ) external view returns ( uint pendingPayout_ ) {
         uint percentVested = percentVestedFor( _depositor );
-        uint payout = bondInfo[ _depositor ].payout;
+        uint payout = ILUM(LUM).balanceForGons(_bondInfo[ _depositor ].gonsPayout);
 
-        if ( percentVested >= 10000 ) {
+        if ( percentVested >= 10_000 ) {
             pendingPayout_ = payout;
         } else {
-            pendingPayout_ = payout.mul( percentVested ).div( 10000 );
+            pendingPayout_ = 0;
         }
     }
-
+    
+    /**
+     *  @notice show the name of current bond
+     *  @return _name string
+     */
+    function name() public view returns (string memory _name) {
+        return name_;
+    }
 
     /* ======= AUXILLIARY ======= */
 
-    /***
-     *  @notice enables policy to emergency recover lost tokens to the DAO.
+    /**
+     *  @notice allow anyone to send lost tokens (excluding principle or LUX) to the DAO
      *  @return bool
      */
-    function recoverLostToken( address _token ) external onlyPolicy() returns (bool) {
+    function recoverLostToken( address _token ) external returns ( bool ) {
+        require( _token != LUX );
+        require( _token != LUM );
+        require( _token != principle );
         IERC20( _token ).safeTransfer( DAO, IERC20( _token ).balanceOf( address(this) ) );
         return true;
     }
 
-    function refundETH() internal {
-        if (address(this).balance > 0) safeTransferETH(DAO, address(this).balance);
-    }
-
-    /// @notice Transfers ETH to the recipient address
-    /// @dev Fails with `STE`
-    /// @param to The destination of the transfer
-    /// @param value The value to be transferred
-    function safeTransferETH(address to, uint256 value) internal {
-        (bool success, ) = to.call{value: value}(new bytes(0));
-        require(success, 'STE');
-    }
 }

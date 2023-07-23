@@ -1,5 +1,5 @@
 /**
- *Submitted for verification at FtmScan.com on 2022-04-20
+ *Submitted for verification at FtmScan.com on 2022-04-19
 */
 
 // SPDX-License-Identifier: MIT
@@ -628,41 +628,14 @@ library FixedPoint {
     }
 }
 
-interface AggregatorV3Interface {
-
-  function decimals() external view returns (uint8);
-  function description() external view returns (string memory);
-  function version() external view returns (uint256);
-
-  // getRoundData and latestRoundData should both raise "No data present"
-  // if they do not have data to report, instead of returning unset values
-  // which could be misinterpreted as actual reported values.
-  function getRoundData(uint80 _roundId)
-    external
-    view
-    returns (
-      uint80 roundId,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    );
-  function latestRoundData()
-    external
-    view
-    returns (
-      uint80 roundId,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    );
-}
-
 interface ITreasury {
     function deposit( uint _amount, address _token, uint _profit ) external returns ( bool );
     function valueOf( address _token, uint _amount ) external view returns ( uint value_ );
-    function mintRewards( address _recipient, uint _amount ) external;
+}
+
+interface IBondCalculator {
+    function valuation( address _LP, uint _amount ) external view returns ( uint );
+    function markdown( address _LP ) external view returns ( uint );
 }
 
 interface IStaking {
@@ -673,12 +646,7 @@ interface IStakingHelper {
     function stake( uint _amount, address _recipient ) external;
 }
 
-interface IWETH9 is IERC20 {
-    /// @notice Deposit ether to get wrapped ether
-    function deposit() external payable;
-}
-
-contract FtmBondDepository is Ownable {
+contract SorLPBondDepository is Ownable {
 
     using FixedPoint for *;
     using SafeERC20 for IERC20;
@@ -686,22 +654,25 @@ contract FtmBondDepository is Ownable {
     using SafeMath for uint32;
 
     /* ======== EVENTS ======== */
+
     event BondCreated( uint deposit, uint indexed payout, uint indexed expires, uint indexed priceInUSD );
     event BondRedeemed( address indexed recipient, uint payout, uint remaining );
     event BondPriceChanged( uint indexed priceInUSD, uint indexed internalPrice, uint indexed debtRatio );
     event ControlVariableAdjustment( uint initialBCV, uint newBCV, uint adjustment, bool addition );
 
     /* ======== STATE VARIABLES ======== */
-    address public immutable LUX = 0x6671E20b83Ba463F270c8c75dAe57e3Cc246cB2b; // token given as payment for bond
-    address public immutable principle = 0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83; // token used to create bond
-    address public immutable treasury = 0xDF2A28Cc2878422354A93fEb05B41Bd57d71DB24; // mints LUX when receives principle
-    address public immutable DAO = 0xcB5ba2079C7E9eA6571bb971E383Fe5D59291a95; // receives profit share from bond
 
-    AggregatorV3Interface internal priceFeed = AggregatorV3Interface(0xf4766552D15AE4d256Ad41B6cf2933482B0680dc);
+    address public immutable Luxor = 0x6671E20b83Ba463F270c8c75dAe57e3Cc246cB2b; // token given as payment for bond
+    address public immutable principle = 0x622E69B6785311800B0d55D72fF27D91F5518212; // LUX-SOR token used to create bond
+    address public treasury = 0xDF2A28Cc2878422354A93fEb05B41Bd57d71DB24; // mints LUX when receives principle
+    address public DAO = 0xcB5ba2079C7E9eA6571bb971E383Fe5D59291a95; // receives profit share from bond
 
-    address public staking = 0xf3F0BCFd430085e198466cdCA4Db8C2Af47f0802; // to auto-stake payout
-    address public stakingHelper = 0x49a359BB873E4DfC9B07b3E32ee404c4e8ED14e7; // to stake and claim if no staking warmup
-    bool public useHelper = true;
+    bool public immutable isLiquidityBond = true; // LP and Reserve bonds are treated slightly different
+    address public bondCalculator = 0x6e2bd6d4654226C752A0bC753A3f9Cd6F569B6cB; // calculates value of LP tokens
+
+    address public staking; // to auto-stake payout
+    address public stakingHelper; // to stake and claim if no staking warmup
+    bool public useHelper;
 
     Terms public terms; // stores terms for new bonds
     Adjust public adjustment; // stores adjustment to BCV data
@@ -709,15 +680,16 @@ contract FtmBondDepository is Ownable {
     mapping( address => Bond ) public bondInfo; // stores bond information for depositors
 
     uint public totalDebt; // total value of outstanding bonds; used for pricing
-    uint32 public lastDecay; // reference block for debt decay
+    uint32 public lastDecay; // reference time for debt decay
 
     /* ======== STRUCTS ======== */
 
     // Info for creating new bonds
     struct Terms {
         uint controlVariable; // scaling variable for price
-        uint minimumPrice; // vs principle value. 4 decimals (1500 = 0.15)
+        uint minimumPrice; // vs principle value
         uint maxPayout; // in thousandths of a %. i.e. 500 = 0.5%
+        uint fee; // as % of bond payout, in hundreths. ( 500 = 5% = 0.05 for every 1 paid)
         uint maxDebt; // 9 decimal debt ratio, max % total supply created as debt
         uint32 vestingTerm; // in seconds
     }
@@ -725,9 +697,9 @@ contract FtmBondDepository is Ownable {
     // Info for bond holder
     struct Bond {
         uint payout; // LUX remaining to be paid
-        uint pricePaid; // In DAI, for front end viewing
-        uint32 vesting; // Seconds left to vest
+        uint pricePaid; // In SOR, for front end viewing
         uint32 lastTime; // Last interaction
+        uint32 vesting; // Seconds left to vest
     }
 
     // Info for incremental adjustments to control variable 
@@ -736,7 +708,7 @@ contract FtmBondDepository is Ownable {
         uint rate; // increment
         uint target; // BCV when adjustment finished
         uint32 buffer; // minimum length (in seconds) between adjustments
-        uint32 lastTime; // block when last adjustment made
+        uint32 lastTime; // time when last adjustment made
     }
 
     /* ======== INITIALIZATION ======== */
@@ -744,9 +716,10 @@ contract FtmBondDepository is Ownable {
     /**
      *  @notice initializes bond parameters
      *  @param _controlVariable uint
-     *  @param _vestingTerm uint
+     *  @param _vestingTerm uint32
      *  @param _minimumPrice uint
      *  @param _maxPayout uint
+     *  @param _fee uint
      *  @param _maxDebt uint
      *  @param _initialDebt uint
      */
@@ -754,34 +727,24 @@ contract FtmBondDepository is Ownable {
         uint _controlVariable, 
         uint _minimumPrice,
         uint _maxPayout,
+        uint _fee,
         uint _maxDebt,
         uint _initialDebt,
         uint32 _vestingTerm
     ) external onlyPolicy() {
-        // require( currentDebt() == 0, "Debt must be 0 for initialization" );
+        require( terms.controlVariable == 0, "Bonds must be initialized from 0" );
         terms = Terms ({
             controlVariable: _controlVariable,
-            vestingTerm: _vestingTerm,
             minimumPrice: _minimumPrice,
             maxPayout: _maxPayout,
-            maxDebt: _maxDebt
+            fee: _fee,
+            maxDebt: _maxDebt,
+            vestingTerm: _vestingTerm
         });
         totalDebt = _initialDebt;
         lastDecay = uint32(block.timestamp);
     }
-
-    function initialize() external onlyPolicy() {
-            terms = Terms ({
-            controlVariable: 100,
-            vestingTerm: 432_000,
-            minimumPrice: 10_000,
-            maxPayout: 333, 
-            maxDebt: 100_000
-        });
-        totalDebt = 0;
-        lastDecay = uint32(block.timestamp);
-    }
-
+    
     // VIEWS //
 
     function viewVestingTerm() public view returns (uint vestingTerm) {
@@ -796,8 +759,8 @@ contract FtmBondDepository is Ownable {
     function viewPayoutPercent() public view returns (uint payoutPercent) {
         return terms.maxPayout / 1_000;
     }
-    function viewFee() public pure returns (uint fee) {
-        return 0;
+    function viewFee() public view returns (uint fee) {
+        return terms.fee;
     }
     function viewMaxDebt() public view returns (uint maxDebt) {
         return terms.maxDebt;
@@ -805,10 +768,10 @@ contract FtmBondDepository is Ownable {
     function viewMinPrice() public view returns (uint minPrice) {
         return terms.minimumPrice;
     }
-    
+
     /* ======== POLICY FUNCTIONS ======== */
 
-    enum PARAMETER { VESTING, PAYOUT, DEBT, MINPRICE }
+    enum PARAMETER { VESTING, PAYOUT, FEE, DEBT, MINPRICE }
     /**
      *  @notice set parameters for new bonds
      *  @param _parameter PARAMETER
@@ -819,13 +782,38 @@ contract FtmBondDepository is Ownable {
             require( _input >= 129600, "Vesting must be longer than 36 hours" );
             terms.vestingTerm = uint32(_input);
         } else if ( _parameter == PARAMETER.PAYOUT ) { // 1
-            require( _input <= 1_000, "Payout cannot be above 1 percent" );
+            require( _input <= 1000, "Payout cannot be above 1 percent" );
             terms.maxPayout = _input;
-        } else if ( _parameter == PARAMETER.DEBT ) { // 2
+        } else if ( _parameter == PARAMETER.FEE ) { // 2
+            require( _input <= 10000, "DAO fee cannot exceed payout" );
+            terms.fee = _input;
+        } else if ( _parameter == PARAMETER.DEBT ) { // 3
             terms.maxDebt = _input;
-        } else if ( _parameter == PARAMETER.MINPRICE ) { // 3
+        } else if ( _parameter == PARAMETER.MINPRICE ) { // 4
             terms.minimumPrice = _input;
         }
+    }
+
+    function setVestingHours(uint _hours) external onlyPolicy() {
+            require( uint32(_hours) >= 3, "vesting must last at least 3 hours" );
+            terms.vestingTerm = uint32(_hours) * 3_600; // 60s * 60m = 3_600s
+    }
+
+    function setPayoutPercent(uint _percent) external onlyPolicy() {
+            terms.maxPayout = _percent * 1_000; // 1K = 1%
+    }
+
+    function setFee(uint _fee) external onlyPolicy() {
+            require( _fee <= 10_000, "fee cannot exceed payout (divisor: 10K)" );
+            terms.fee = _fee;
+    }
+
+    function setMaxDebt(uint _maxDebt) external onlyPolicy() {
+            terms.maxDebt = _maxDebt;
+    }
+
+    function setMinimumPrice(uint _minPrice) external onlyPolicy() {
+            terms.minimumPrice = _minPrice;
     }
 
     /**
@@ -852,24 +840,6 @@ contract FtmBondDepository is Ownable {
         });
     }
 
-    function setVestingTerm(uint term) external onlyPolicy() {
-        require( uint32(term) >= 129600, "vesting must last at least 36 hours" );
-        terms.vestingTerm = uint32(term) * 3_600; // 60s * 60m = 3_600s
-    }
-
-    function setPayoutPercent(uint _percent) external onlyPolicy() {
-        require( _percent <= 1_000, "Payout cannot be above 1 percent" );
-        terms.maxPayout = _percent; // 1K = 1%
-    }
-
-    function setMaxDebt(uint _maxDebt) external onlyPolicy() {
-            terms.maxDebt = _maxDebt;
-    }
-
-    function setMinimumPrice(uint _minPrice) external onlyPolicy() {
-            terms.minimumPrice = _minPrice;
-    }
-
     /**
      *  @notice set contract for auto stake
      *  @param _staking address
@@ -886,6 +856,21 @@ contract FtmBondDepository is Ownable {
         }
     }
 
+    function setTreasury(address _treasury) external onlyPolicy() {
+        require( _treasury != address(0) );
+        treasury = _treasury;
+    }
+    
+    function setDAO(address _DAO) external onlyPolicy() {
+        require( _DAO != address(0) );
+        DAO = _DAO;
+    }
+
+    function setBondCalculator(address _bondCalculator) external onlyPolicy() {
+        require( _bondCalculator != address(0) );
+        bondCalculator = _bondCalculator;
+    }
+
     /* ======== USER FUNCTIONS ======== */
 
     /**
@@ -899,7 +884,7 @@ contract FtmBondDepository is Ownable {
         uint _amount, 
         uint _maxPrice,
         address _depositor
-    ) external payable returns ( uint ) {
+    ) external returns ( uint ) {
         require( _depositor != address(0), "Invalid address" );
 
         decayDebt();
@@ -916,19 +901,22 @@ contract FtmBondDepository is Ownable {
         require( payout >= 10000000, "Bond too small" ); // must be > 0.01 LUX ( underflow protection )
         require( payout <= maxPayout(), "Bond too large"); // size protection because there is no slippage
 
+        // profits are calculated
+        uint fee = payout.mul( terms.fee ).div( 10000 );
+        uint profit = value.sub( payout ).sub( fee );
+
         /**
-            asset carries risk and is not minted against
-            asset transfered to treasury and rewards minted as payout
+            principle is transferred in
+            approved and
+            deposited into the treasury, returning (_amount - profit) LUX
          */
-        if (address(this).balance >= _amount) {
-            // pay with WETH9
-            IWETH9(principle).deposit{value: _amount}(); // wrap only what is needed to pay
-            IWETH9(principle).transfer(treasury, _amount);
-        } else {
-            IERC20( principle ).safeTransferFrom( msg.sender, treasury, _amount );
-        }
+        IERC20( principle ).safeTransferFrom( msg.sender, address(this), _amount );
+        IERC20( principle ).approve( address( treasury ), _amount );
+        ITreasury( treasury ).deposit( _amount, principle, profit );
         
-        ITreasury( treasury ).mintRewards( address(this), payout );
+        if ( fee != 0 ) { // fee is transferred to dao 
+            IERC20( Luxor ).safeTransfer( DAO, fee ); 
+        }
         
         // total debt is increased
         totalDebt = totalDebt.add( value ); 
@@ -946,7 +934,6 @@ contract FtmBondDepository is Ownable {
         emit BondPriceChanged( bondPriceInUSD(), _bondPrice(), debtRatio() );
 
         adjust(); // control variable is adjusted
-        refundETH(); //refund user if needed
         return payout; 
     }
 
@@ -958,7 +945,8 @@ contract FtmBondDepository is Ownable {
      */ 
     function redeem( address _recipient, bool _stake ) external returns ( uint ) {        
         Bond memory info = bondInfo[ _recipient ];
-        uint percentVested = percentVestedFor( _recipient ); // (blocks since last interaction / vesting term remaining)
+        // (seconds since last interaction / vesting term remaining)
+        uint percentVested = percentVestedFor( _recipient );
 
         if ( percentVested >= 10000 ) { // if fully vested
             delete bondInfo[ _recipient ]; // delete user info
@@ -968,12 +956,11 @@ contract FtmBondDepository is Ownable {
         } else { // if unfinished
             // calculate payout vested
             uint payout = info.payout.mul( percentVested ).div( 10000 );
-
             // store updated deposit info
             bondInfo[ _recipient ] = Bond({
                 payout: info.payout.sub( payout ),
                 vesting: info.vesting.sub32( uint32( block.timestamp ).sub32( info.lastTime ) ),
-                lastTime: uint32( block.timestamp ),
+                lastTime: uint32(block.timestamp),
                 pricePaid: info.pricePaid
             });
 
@@ -992,13 +979,13 @@ contract FtmBondDepository is Ownable {
      */
     function stakeOrSend( address _recipient, bool _stake, uint _amount ) internal returns ( uint ) {
         if ( !_stake ) { // if user does not want to stake
-            IERC20( LUX ).transfer( _recipient, _amount ); // send payout
+            IERC20( Luxor ).transfer( _recipient, _amount ); // send payout
         } else { // if user wants to stake
             if ( useHelper ) { // use if staking warmup is 0
-                IERC20( LUX ).approve( stakingHelper, _amount );
+                IERC20( Luxor ).approve( stakingHelper, _amount );
                 IStakingHelper( stakingHelper ).stake( _amount, _recipient );
             } else {
-                IERC20( LUX ).approve( staking, _amount );
+                IERC20( Luxor ).approve( staking, _amount );
                 IStaking( staking ).stake( _amount, _recipient );
             }
         }
@@ -1009,8 +996,8 @@ contract FtmBondDepository is Ownable {
      *  @notice makes incremental adjustment to control variable
      */
     function adjust() internal {
-         uint timeCanAdjust = adjustment.lastTime.add( adjustment.buffer );
-         if( adjustment.rate != 0 && block.timestamp >= timeCanAdjust ) {
+        uint timeCanAdjust = adjustment.lastTime.add( adjustment.buffer );
+        if( adjustment.rate != 0 && block.timestamp >= timeCanAdjust ) {
             uint initial = terms.controlVariable;
             if ( adjustment.add ) {
                 terms.controlVariable = terms.controlVariable.add( adjustment.rate );
@@ -1043,7 +1030,7 @@ contract FtmBondDepository is Ownable {
      *  @return uint
      */
     function maxPayout() public view returns ( uint ) {
-        return IERC20( LUX ).totalSupply().mul( terms.maxPayout ).div( 100000 );
+        return IERC20( Luxor ).totalSupply().mul( terms.maxPayout ).div( 100000 );
     }
 
     /**
@@ -1052,7 +1039,7 @@ contract FtmBondDepository is Ownable {
      *  @return uint
      */
     function payoutFor( uint _value ) public view returns ( uint ) {
-        return FixedPoint.fraction( _value, bondPrice() ).decode112with18().div( 1e14 );
+        return FixedPoint.fraction( _value, bondPrice() ).decode112with18().div( 1e16 );
     }
 
 
@@ -1061,7 +1048,7 @@ contract FtmBondDepository is Ownable {
      *  @return price_ uint
      */
     function bondPrice() public view returns ( uint price_ ) {        
-        price_ = terms.controlVariable.mul( debtRatio() ).div( 1e5 );
+        price_ = terms.controlVariable.mul( debtRatio() ).add( 1000000000 ).div( 1e7 );
         if ( price_ < terms.minimumPrice ) {
             price_ = terms.minimumPrice;
         }
@@ -1072,7 +1059,7 @@ contract FtmBondDepository is Ownable {
      *  @return price_ uint
      */
     function _bondPrice() internal returns ( uint price_ ) {
-        price_ = terms.controlVariable.mul( debtRatio() ).div( 1e5 );
+        price_ = terms.controlVariable.mul( debtRatio() ).add( 1000000000 ).div( 1e7 );
         if ( price_ < terms.minimumPrice ) {
             price_ = terms.minimumPrice;        
         } else if ( terms.minimumPrice != 0 ) {
@@ -1081,28 +1068,23 @@ contract FtmBondDepository is Ownable {
     }
 
     /**
-     *  @notice get asset price from chainlink
-     */
-    function assetPrice() public view returns (int) {
-        ( , int price, , , ) = priceFeed.latestRoundData();
-        return price;
-    }
-
-    /**
-     *  @notice converts bond price to DAI value
+     *  @notice converts bond price to SOR value
      *  @return price_ uint
      */
     function bondPriceInUSD() public view returns ( uint price_ ) {
-        price_ = bondPrice().mul( uint( assetPrice() ) ).mul( 1e6 );
+        if( isLiquidityBond ) {
+            price_ = bondPrice().mul( IBondCalculator( bondCalculator ).markdown( principle ) ).div( 100 );
+        } else {
+            price_ = bondPrice().mul( 10 ** IERC20( principle ).decimals() ).div( 100 );
+        }
     }
-
 
     /**
      *  @notice calculate current ratio of debt to LUX supply
      *  @return debtRatio_ uint
      */
     function debtRatio() public view returns ( uint debtRatio_ ) {   
-        uint supply = IERC20( LUX ).totalSupply();
+        uint supply = IERC20( Luxor ).totalSupply();
         debtRatio_ = FixedPoint.fraction( 
             currentDebt().mul( 1e9 ), 
             supply
@@ -1110,11 +1092,15 @@ contract FtmBondDepository is Ownable {
     }
 
     /**
-     *  @notice debt ratio in same terms as reserve bonds
+     *  @notice debt ratio in same terms for reserve or liquidity bonds
      *  @return uint
      */
     function standardizedDebtRatio() external view returns ( uint ) {
-        return debtRatio().mul( uint( assetPrice() ) ).div( 1e8 ); // ETH feed is 8 decimals
+        if ( isLiquidityBond ) {
+            return debtRatio().mul( IBondCalculator( bondCalculator ).markdown( principle ) ).div( 1e9 );
+        } else {
+            return debtRatio();
+        }
     }
 
     /**
@@ -1136,7 +1122,6 @@ contract FtmBondDepository is Ownable {
             decay_ = totalDebt;
         }
     }
-
 
     /**
      *  @notice calculate how far into vesting a depositor is
@@ -1171,7 +1156,6 @@ contract FtmBondDepository is Ownable {
         }
     }
 
-
     /* ======= AUXILLIARY ======= */
 
     /***
@@ -1181,18 +1165,5 @@ contract FtmBondDepository is Ownable {
     function recoverLostToken( address _token ) external onlyPolicy() returns (bool) {
         IERC20( _token ).safeTransfer( DAO, IERC20( _token ).balanceOf( address(this) ) );
         return true;
-    }
-
-    function refundETH() internal {
-        if (address(this).balance > 0) safeTransferETH(DAO, address(this).balance);
-    }
-
-    /// @notice Transfers ETH to the recipient address
-    /// @dev Fails with `STE`
-    /// @param to The destination of the transfer
-    /// @param value The value to be transferred
-    function safeTransferETH(address to, uint256 value) internal {
-        (bool success, ) = to.call{value: value}(new bytes(0));
-        require(success, 'STE');
     }
 }

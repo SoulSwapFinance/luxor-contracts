@@ -1,0 +1,11 @@
+Retiring
+
+- LUX-DAI: 5 DAY, 7 DAY
+- DAI: 5 DAY, 7 DAY
+- LUX-FTM: 5 DAY, 7 DAY
+
+
+New
+- LUX-SOR: 5 DAY, 7 DAY
+- SOR: 5 DAY, 7 DAY
+- FTM-SOR: 5 DAY, 7 DAY

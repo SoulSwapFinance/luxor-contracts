@@ -784,7 +784,31 @@ contract EthBondDepository is Ownable {
         totalDebt = _initialDebt;
         lastDecay = uint32(block.timestamp);
     }
-    
+
+    // VIEWS //
+
+    function viewVestingTerm() public view returns (uint vestingTerm) {
+        return terms.vestingTerm;
+    }
+    function viewVestingHours() public view returns (uint vestingHours) {
+        return terms.vestingTerm / 3_600;
+    }
+    function viewVestingDays() public view returns (uint vestingDays) {
+        return terms.vestingTerm / 86_400;
+    }
+    function viewPayoutPercent() public view returns (uint payoutPercent) {
+        return terms.maxPayout / 1_000;
+    }
+    function viewFee() public view returns (uint fee) {
+        return terms.fee;
+    }
+    function viewMaxDebt() public view returns (uint maxDebt) {
+        return terms.maxDebt;
+    }
+    function viewMinPrice() public view returns (uint minPrice) {
+        return terms.minimumPrice;
+    }
+
     /* ======== POLICY FUNCTIONS ======== */
 
     enum PARAMETER { VESTING, PAYOUT, DEBT, MINPRICE }
